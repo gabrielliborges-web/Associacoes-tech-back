@@ -5,14 +5,10 @@ import express, { Application } from "express";
 import authRoutes from "./routes/auth.routes";
 import usersRoutes from "./routes/user.routes";
 import passwordsRoutes from "./routes/passwordReset.routes";
-import categoriaRoutes from "./routes/categoria.routes";
-import produtoRoutes from "./routes/produto.routes";
-import compraRoutes from "./routes/compra.routes";
-import vendaRoutes from "./routes/venda.routes";
-import entradaFinanceiraRoutes from "./routes/entradaFinanceira.routes";
-import movimentacaoRoutes from "./routes/movimentacao.routes";
-import configuracaoRoutes from "./routes/configuracao.routes";
-import despesaRoutes from "./routes/despesa.routes";
+import usuariosRoutes from "./routes/usuario.routes";
+import associacoesRoutes from "./routes/associacao.routes";
+import associacaoUsuarioRoutes from "./routes/associacaoUsuario.routes";
+import associadoRoutes from "./routes/associado.routes";
 import { setupSwagger } from "./config/swagger";
 
 const app: Application = express();
@@ -33,14 +29,10 @@ app.use(
 app.use("/auth", authRoutes);
 app.use("/user", usersRoutes);
 app.use("/password-reset", passwordsRoutes);
-app.use("/categorias", categoriaRoutes);
-app.use("/produtos", produtoRoutes);
-app.use("/compras", compraRoutes);
-app.use("/vendas", vendaRoutes);
-app.use("/entradas", entradaFinanceiraRoutes);
-app.use("/movimentacoes", movimentacaoRoutes);
-app.use("/config", configuracaoRoutes);
-app.use("/despesas", despesaRoutes);
+app.use("/usuarios", usuariosRoutes);
+app.use("/associacoes", associacoesRoutes);
+app.use("/associacoes", associacaoUsuarioRoutes); // rotas com mergeParams
+app.use("/", associadoRoutes);
 
 app.get("/", (req, res) => {
   res.send("Desafio-movie-back ON");

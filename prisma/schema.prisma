@@ -7,9 +7,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// -----------------------------------------------------
-// ENUMS
-// -----------------------------------------------------
+/* ============================
+   ENUMS GERAIS
+============================ */
+
 enum Theme {
   DARK
   LIGHT
@@ -21,26 +22,83 @@ enum Role {
   SUPERADMIN
 }
 
-// -----------------------------------------------------
-// USUÁRIOS
-// -----------------------------------------------------
-model Usuario {
-  id              Int                 @id @default(autoincrement())
-  nome            String
-  email           String              @unique
-  senha           String
-  role            Role                @default(USER)
-  theme           Theme?              @default(DARK)
-  ativo           Boolean             @default(true)
-  criadoEm        DateTime            @default(now())
-  atualizadoEm    DateTime            @updatedAt
+enum TipoMidia {
+  FOTO
+  VIDEO
+}
 
-  produtos        Produto[]
-  vendas          Venda[]
-  entradas        EntradaFinanceira[]
-  compras         Compra[]
-  movimentacoes   MovimentacaoFinanceira[]
-  despesas          Despesa[]
+/* ============================
+   ENUMS FUTEBOL / ASSOCIAÇÃO
+============================ */
+
+enum Posicao {
+  GOLEIRO
+  ZAGUEIRO
+  LATERAL
+  VOLANTE
+  MEIA
+  ATACANTE
+}
+
+enum PernaDominante {
+  DIREITA
+  ESQUERDA
+  AMBIDESTRO
+}
+
+enum TipoJogo {
+  BABA
+  AMISTOSO
+  CAMPEONATO
+  TREINO
+}
+
+enum TipoGol {
+  NORMAL
+  PENALTI
+  FALTA
+  CONTRA
+  OUTRO
+}
+
+enum TipoCartao {
+  AMARELO
+  VERMELHO
+}
+
+enum LadoTime {
+  A
+  B
+}
+
+enum PerfilAssociacao {
+  SOCIO
+  DIRETOR
+  TECNICO
+  ADMINISTRADOR
+}
+
+/* ============================
+   AUTENTICAÇÃO / USUÁRIO
+============================ */
+
+model Usuario {
+  id           Int                @id @default(autoincrement())
+  nome         String
+  email        String             @unique
+  senha        String
+  avatarUrl    String?
+  role         Role               @default(USER)
+  theme        Theme?             @default(DARK)
+  ativo        Boolean            @default(true)
+  criadoEm     DateTime           @default(now())
+  atualizadoEm DateTime           @updatedAt
+
+  // Relacionamento opcional com um Associado (quando o jogador tem login)
+  associado    Associado?         @relation("UsuarioAssociado")
+
+  // Perfis do usuário em uma ou mais associações
+  associacoes  UsuarioAssociacao[]
 }
 
 model PasswordReset {
@@ -53,166 +111,227 @@ model PasswordReset {
   updatedAt DateTime @updatedAt
 }
 
-// -----------------------------------------------------
-// CATEGORIAS DE PRODUTOS
-// -----------------------------------------------------
-model Categoria {
-  id        Int        @id @default(autoincrement())
-  nome      String
-  descricao String?
-  ativo     Boolean    @default(true)
-  produtos  Produto[]
+/* ============================
+   ASSOCIAÇÃO / CLUBE
+============================ */
 
-  criadoEm  DateTime   @default(now())
-  atualizadoEm DateTime @updatedAt
+model Associacao {
+  id           Int                 @id @default(autoincrement())
+  nome         String
+  apelido      String?
+  descricao    String?
+  cidade       String?
+  estado       String?
+  logoUrl      String?
+  ativa        Boolean             @default(true)
+  criadoEm     DateTime            @default(now())
+  atualizadoEm DateTime            @updatedAt
+
+  associados   Associado[]
+  usuarios     UsuarioAssociacao[]
+  jogos        Jogo[]
 }
 
-// -----------------------------------------------------
-// PRODUTOS
-// -----------------------------------------------------
-model Produto {
-  id               Int         @id @default(autoincrement())
-  nome             String
-  descricao        String?
-  categoriaId      Int?
-  categoria        Categoria?  @relation(fields: [categoriaId], references: [id])
-  
-  precoVenda       Decimal     @db.Decimal(10,2)
-  precoCompra      Decimal?    @db.Decimal(10,2)
-  precoPromocional Decimal?    @db.Decimal(10,2)
+/* ============================
+   ASSOCIADOS (JOGADORES / SÓCIOS)
+============================ */
 
-  estoque          Int         @default(0)
-  ativo            Boolean     @default(true)
-  imagem           String?
+model Associado {
+  id                 Int                @id @default(autoincrement())
+  associacaoId       Int
+  nome               String
+  apelido            String?
+  dataNascimento     DateTime?
+  telefone           String?
+  email              String?
+  fotoUrl            String?
+  numeroCamisaPadrao Int?
+  posicaoPreferida   Posicao?
+  pernaDominante     PernaDominante?
+  dataEntrada        DateTime?          @default(now())
+  ativo              Boolean            @default(true)
+  observacoes        String?
 
-  usuarioId        Int?
-  usuario          Usuario?    @relation(fields: [usuarioId], references: [id])
+  // Associação a que pertence
+  associacao         Associacao         @relation(fields: [associacaoId], references: [id])
 
-  vendasItens      ItemVenda[]
-  comprasItens     ItemCompra[]
+  // Ligação opcional com o usuário (login na intranet)
+  usuarioId          Int?               @unique
+  usuario            Usuario?           @relation("UsuarioAssociado", fields: [usuarioId], references: [id])
 
-  criadoEm         DateTime     @default(now())
-  atualizadoEm     DateTime     @updatedAt
+  presencas          PresencaJogo[]
+  participacoes      JogadorJogo[]
+
+  @@index([associacaoId])
 }
 
-// -----------------------------------------------------
-// VENDAS
-// -----------------------------------------------------
-model Venda {
-  id             Int           @id @default(autoincrement())
-  usuarioId      Int
-  usuario        Usuario       @relation(fields: [usuarioId], references: [id])
+/* ============================
+   USUÁRIO x ASSOCIAÇÃO (PERFIS)
+============================ */
 
-  data           DateTime      @default(now())
-  total          Decimal       @db.Decimal(10,2)
-  formaPagamento String
-  descricao      String?
-
-  itens          ItemVenda[]
-
-  criadoEm       DateTime      @default(now())
-  atualizadoEm   DateTime      @updatedAt
-}
-
-model ItemVenda {
-  id         Int       @id @default(autoincrement())
-  quantidade Int
-  precoUnit  Decimal   @db.Decimal(10,2)
-
-  produtoId  Int
-  vendaId    Int
-
-  produto    Produto   @relation(fields: [produtoId], references: [id])
-  venda      Venda     @relation(fields: [vendaId], references: [id], onDelete: Cascade)
-}
-
-// -----------------------------------------------------
-// COMPRAS
-// -----------------------------------------------------
-model Compra {
-  id         Int           @id @default(autoincrement())
-  usuarioId  Int
-  usuario    Usuario       @relation(fields: [usuarioId], references: [id])
-
-  fornecedor String?
-  data       DateTime      @default(now())
-  total      Decimal       @db.Decimal(10,2)
-  observacao String?
-
-  itens      ItemCompra[]
-
-  criadoEm   DateTime      @default(now())
-}
-
-model ItemCompra {
-  id         Int       @id @default(autoincrement())
-  quantidade Int
-  custoUnit  Decimal   @db.Decimal(10,2)
-
-  produtoId  Int
-  compraId   Int
-
-  produto    Produto   @relation(fields: [produtoId], references: [id])
-  compra     Compra    @relation(fields: [compraId], references: [id], onDelete: Cascade)
-}
-
-// -----------------------------------------------------
-// ENTRADAS FINANCEIRAS (NÃO-VENDA)
-// -----------------------------------------------------
-model EntradaFinanceira {
-  id         Int         @id @default(autoincrement())
-  usuarioId  Int
-  usuario    Usuario     @relation(fields: [usuarioId], references: [id])
-
-  tipo       String      
-  valor      Decimal      @db.Decimal(10,2)
-  data       DateTime     @default(now())
-  observacao String?
-
-  criadoEm   DateTime     @default(now())
-}
-
-// -----------------------------------------------------
-// MOVIMENTAÇÃO FINANCEIRA (Extrato Unificado)
-// -----------------------------------------------------
-model MovimentacaoFinanceira {
-  id           Int         @id @default(autoincrement())
+model UsuarioAssociacao {
+  id           Int              @id @default(autoincrement())
   usuarioId    Int
-  usuario      Usuario     @relation(fields: [usuarioId], references: [id])
+  associacaoId Int
+  perfil       PerfilAssociacao @default(SOCIO)
 
-  data         DateTime    @default(now())
-  tipo         String       // venda, compra, entrada_financeira
-  referenciaId Int?
-  descricao    String
-  valor        Decimal      @db.Decimal(10,2)
-  entrada      Boolean
-  saldoApos    Decimal?     @db.Decimal(10,2)
+  usuario      Usuario          @relation(fields: [usuarioId], references: [id])
+  associacao   Associacao       @relation(fields: [associacaoId], references: [id])
 
-  criadoEm     DateTime     @default(now())
+  @@unique([usuarioId, associacaoId])
+  @@index([associacaoId])
 }
 
-// -----------------------------------------------------
-// CONFIGURAÇÕES DO SISTEMA
-// -----------------------------------------------------
-model Configuracao {
-  id           Int       @id @default(autoincrement())
-  saldoInicial Decimal?  @db.Decimal(10,2)
-  mesAtual     Int?
-  criadoEm     DateTime  @default(now())
+/* ============================
+   JOGOS / PARTIDAS
+============================ */
+
+model Jogo {
+  id           Int            @id @default(autoincrement())
+  associacaoId Int
+  data         DateTime
+  tipo         TipoJogo       @default(BABA)
+  descricao    String?
+  local        String?
+  placarTimeA  Int            @default(0)
+  placarTimeB  Int            @default(0)
+  observacoes  String?
+  criadoEm     DateTime       @default(now())
+  atualizadoEm DateTime       @updatedAt
+
+  associacao   Associacao     @relation(fields: [associacaoId], references: [id])
+
+  times        TimeJogo[]
+  gols         Gol[]
+  cartoes      Cartao[]
+  presencas    PresencaJogo[]
+
+  // 👉 ADICIONAR ESTA LINHA
+  midias       MidiaJogo[]
+
+  @@index([associacaoId])
+  @@index([data])
 }
 
-model Despesa {
+
+/* ============================
+   TIMES POR JOGO
+============================ */
+
+model TimeJogo {
+  id           Int        @id @default(autoincrement())
+  jogoId       Int
+  nome         String          // Ex: "Time Azul", "Time Branco"
+  corPrincipal String?         // Ex: "#1D4ED8"
+  lado         LadoTime        // A ou B (p/ bater com placarTimeA / placarTimeB)
+
+  jogo         Jogo       @relation(fields: [jogoId], references: [id])
+  jogadores    JogadorJogo[]
+  gols         Gol[]
+
+  @@index([jogoId])
+}
+
+/* ============================
+   JOGADOR EM UM JOGO
+============================ */
+
+model JogadorJogo {
+  id           Int         @id @default(autoincrement())
+  timeJogoId   Int
+  associadoId  Int
+  titular      Boolean     @default(true)
+  numeroCamisa Int?
+  posicao      Posicao?
+  observacoes  String?
+
+  time         TimeJogo    @relation(fields: [timeJogoId], references: [id])
+  associado    Associado   @relation(fields: [associadoId], references: [id])
+  gols         Gol[]
+  cartoes      Cartao[]
+
+  @@index([timeJogoId])
+  @@index([associadoId])
+}
+
+/* ============================
+   GOLS
+============================ */
+
+model Gol {
+  id            Int          @id @default(autoincrement())
+  jogoId        Int
+  timeJogoId    Int
+  jogadorJogoId Int?
+  minuto        Int?
+  tipo          TipoGol      @default(NORMAL)
+
+  jogo          Jogo         @relation(fields: [jogoId], references: [id])
+  time          TimeJogo     @relation(fields: [timeJogoId], references: [id])
+  jogador       JogadorJogo? @relation(fields: [jogadorJogoId], references: [id])
+
+  criadoEm      DateTime     @default(now())
+
+  @@index([jogoId])
+  @@index([timeJogoId])
+  @@index([jogadorJogoId])
+}
+
+/* ============================
+   CARTÕES
+============================ */
+
+model Cartao {
+  id            Int          @id @default(autoincrement())
+  jogoId        Int
+  jogadorJogoId Int
+  minuto        Int?
+  tipo          TipoCartao
+  motivo        String?
+
+  jogo          Jogo         @relation(fields: [jogoId], references: [id])
+  jogador       JogadorJogo  @relation(fields: [jogadorJogoId], references: [id])
+
+  criadoEm      DateTime     @default(now())
+
+  @@index([jogoId])
+  @@index([jogadorJogoId])
+}
+
+/* ============================
+   PRESENÇA EM JOGO
+============================ */
+
+model PresencaJogo {
+  id             Int        @id @default(autoincrement())
+  jogoId         Int
+  associadoId    Int
+  presente       Boolean    @default(true)
+  chegouAtrasado Boolean?   @default(false)
+  observacoes    String?
+
+  jogo           Jogo       @relation(fields: [jogoId], references: [id])
+  associado      Associado  @relation(fields: [associadoId], references: [id])
+
+  criadoEm       DateTime   @default(now())
+
+  @@unique([jogoId, associadoId])
+  @@index([jogoId])
+  @@index([associadoId])
+}
+
+
+
+
+model MidiaJogo {
   id          Int        @id @default(autoincrement())
-  usuarioId   Int
-  usuario     Usuario    @relation(fields: [usuarioId], references: [id])
-
-  tipo        String      
+  jogoId      Int
+  url         String     // onde a imagem/vídeo está salvo
+  tipo        TipoMidia  @default(FOTO)
   descricao   String?
-  valor       Decimal    @db.Decimal(10,2)
-  data        DateTime   @default(now())
-
-  observacao  String?
-
   criadoEm    DateTime   @default(now())
-  atualizadoEm DateTime  @updatedAt
+
+  jogo        Jogo       @relation(fields: [jogoId], references: [id])
+
+  @@index([jogoId])
 }
