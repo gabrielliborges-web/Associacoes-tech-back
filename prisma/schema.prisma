@@ -1,0 +1,218 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// -----------------------------------------------------
+// ENUMS
+// -----------------------------------------------------
+enum Theme {
+  DARK
+  LIGHT
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
+}
+
+// -----------------------------------------------------
+// USUÁRIOS
+// -----------------------------------------------------
+model Usuario {
+  id              Int                 @id @default(autoincrement())
+  nome            String
+  email           String              @unique
+  senha           String
+  role            Role                @default(USER)
+  theme           Theme?              @default(DARK)
+  ativo           Boolean             @default(true)
+  criadoEm        DateTime            @default(now())
+  atualizadoEm    DateTime            @updatedAt
+
+  produtos        Produto[]
+  vendas          Venda[]
+  entradas        EntradaFinanceira[]
+  compras         Compra[]
+  movimentacoes   MovimentacaoFinanceira[]
+  despesas          Despesa[]
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// -----------------------------------------------------
+// CATEGORIAS DE PRODUTOS
+// -----------------------------------------------------
+model Categoria {
+  id        Int        @id @default(autoincrement())
+  nome      String
+  descricao String?
+  ativo     Boolean    @default(true)
+  produtos  Produto[]
+
+  criadoEm  DateTime   @default(now())
+  atualizadoEm DateTime @updatedAt
+}
+
+// -----------------------------------------------------
+// PRODUTOS
+// -----------------------------------------------------
+model Produto {
+  id               Int         @id @default(autoincrement())
+  nome             String
+  descricao        String?
+  categoriaId      Int?
+  categoria        Categoria?  @relation(fields: [categoriaId], references: [id])
+  
+  precoVenda       Decimal     @db.Decimal(10,2)
+  precoCompra      Decimal?    @db.Decimal(10,2)
+  precoPromocional Decimal?    @db.Decimal(10,2)
+
+  estoque          Int         @default(0)
+  ativo            Boolean     @default(true)
+  imagem           String?
+
+  usuarioId        Int?
+  usuario          Usuario?    @relation(fields: [usuarioId], references: [id])
+
+  vendasItens      ItemVenda[]
+  comprasItens     ItemCompra[]
+
+  criadoEm         DateTime     @default(now())
+  atualizadoEm     DateTime     @updatedAt
+}
+
+// -----------------------------------------------------
+// VENDAS
+// -----------------------------------------------------
+model Venda {
+  id             Int           @id @default(autoincrement())
+  usuarioId      Int
+  usuario        Usuario       @relation(fields: [usuarioId], references: [id])
+
+  data           DateTime      @default(now())
+  total          Decimal       @db.Decimal(10,2)
+  formaPagamento String
+  descricao      String?
+
+  itens          ItemVenda[]
+
+  criadoEm       DateTime      @default(now())
+  atualizadoEm   DateTime      @updatedAt
+}
+
+model ItemVenda {
+  id         Int       @id @default(autoincrement())
+  quantidade Int
+  precoUnit  Decimal   @db.Decimal(10,2)
+
+  produtoId  Int
+  vendaId    Int
+
+  produto    Produto   @relation(fields: [produtoId], references: [id])
+  venda      Venda     @relation(fields: [vendaId], references: [id], onDelete: Cascade)
+}
+
+// -----------------------------------------------------
+// COMPRAS
+// -----------------------------------------------------
+model Compra {
+  id         Int           @id @default(autoincrement())
+  usuarioId  Int
+  usuario    Usuario       @relation(fields: [usuarioId], references: [id])
+
+  fornecedor String?
+  data       DateTime      @default(now())
+  total      Decimal       @db.Decimal(10,2)
+  observacao String?
+
+  itens      ItemCompra[]
+
+  criadoEm   DateTime      @default(now())
+}
+
+model ItemCompra {
+  id         Int       @id @default(autoincrement())
+  quantidade Int
+  custoUnit  Decimal   @db.Decimal(10,2)
+
+  produtoId  Int
+  compraId   Int
+
+  produto    Produto   @relation(fields: [produtoId], references: [id])
+  compra     Compra    @relation(fields: [compraId], references: [id], onDelete: Cascade)
+}
+
+// -----------------------------------------------------
+// ENTRADAS FINANCEIRAS (NÃO-VENDA)
+// -----------------------------------------------------
+model EntradaFinanceira {
+  id         Int         @id @default(autoincrement())
+  usuarioId  Int
+  usuario    Usuario     @relation(fields: [usuarioId], references: [id])
+
+  tipo       String      
+  valor      Decimal      @db.Decimal(10,2)
+  data       DateTime     @default(now())
+  observacao String?
+
+  criadoEm   DateTime     @default(now())
+}
+
+// -----------------------------------------------------
+// MOVIMENTAÇÃO FINANCEIRA (Extrato Unificado)
+// -----------------------------------------------------
+model MovimentacaoFinanceira {
+  id           Int         @id @default(autoincrement())
+  usuarioId    Int
+  usuario      Usuario     @relation(fields: [usuarioId], references: [id])
+
+  data         DateTime    @default(now())
+  tipo         String       // venda, compra, entrada_financeira
+  referenciaId Int?
+  descricao    String
+  valor        Decimal      @db.Decimal(10,2)
+  entrada      Boolean
+  saldoApos    Decimal?     @db.Decimal(10,2)
+
+  criadoEm     DateTime     @default(now())
+}
+
+// -----------------------------------------------------
+// CONFIGURAÇÕES DO SISTEMA
+// -----------------------------------------------------
+model Configuracao {
+  id           Int       @id @default(autoincrement())
+  saldoInicial Decimal?  @db.Decimal(10,2)
+  mesAtual     Int?
+  criadoEm     DateTime  @default(now())
+}
+
+model Despesa {
+  id          Int        @id @default(autoincrement())
+  usuarioId   Int
+  usuario     Usuario    @relation(fields: [usuarioId], references: [id])
+
+  tipo        String      
+  descricao   String?
+  valor       Decimal    @db.Decimal(10,2)
+  data        DateTime   @default(now())
+
+  observacao  String?
+
+  criadoEm    DateTime   @default(now())
+  atualizadoEm DateTime  @updatedAt
+}

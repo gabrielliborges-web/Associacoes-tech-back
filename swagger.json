@@ -1,0 +1,4851 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Gerenciador MKP API",
+    "version": "1.0.0",
+    "description": "Documentação da API do Gerenciador MKP"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000"
+    }
+  ],
+  "paths": {
+    "/auth/signup": {
+      "post": {
+        "summary": "Cria um novo usuário",
+        "description": "Registra um novo usuário no sistema com nome, e-mail, senha e tema opcional (LIGHT ou DARK). <br><br> A senha deve atender aos seguintes critérios: - Ter pelo menos 8 caracteres; - Conter pelo menos uma letra maiúscula; - Conter pelo menos uma letra minúscula; - Conter pelo menos um número; - Conter pelo menos um símbolo especial (@$!%*?&).\n",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["nome", "email", "senha"],
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "example": "Gabrielli Borges"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "gabi@example.com"
+                  },
+                  "senha": {
+                    "type": "string",
+                    "example": "Gabi@2025"
+                  },
+                  "theme": {
+                    "type": "string",
+                    "enum": ["LIGHT", "DARK"],
+                    "default": "DARK",
+                    "example": "DARK"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuário criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "usuario": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "nome": {
+                          "type": "string",
+                          "example": "Gabrielli Borges"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "gabi@example.com"
+                        },
+                        "theme": {
+                          "type": "string",
+                          "example": "DARK"
+                        },
+                        "criadoEm": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2025-11-21T10:30:00Z"
+                        }
+                      }
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": ["A senha deve conter pelo menos um número."]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "E-mail já cadastrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "E-mail já cadastrado."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Realiza login de usuário",
+        "description": "Faz login com e-mail e senha, retornando o token JWT e os dados do usuário. <br><br> A senha deve ter pelo menos 8 caracteres.\n",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "senha"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "gabi@example.com"
+                  },
+                  "senha": {
+                    "type": "string",
+                    "example": "Gabi@2025"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login bem-sucedido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "usuario": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "nome": {
+                          "type": "string",
+                          "example": "Gabrielli Borges"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "gabi@example.com"
+                        },
+                        "theme": {
+                          "type": "string",
+                          "example": "DARK"
+                        },
+                        "criadoEm": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2025-11-21T10:30:00Z"
+                        }
+                      }
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "E-mail inválido.",
+                        "Senha deve ter pelo menos 8 caracteres."
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciais inválidas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Senha incorreta."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Usuário não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categorias": {
+      "get": {
+        "summary": "Lista todas as categorias",
+        "description": "Retorna uma lista com todas as categorias cadastradas no sistema",
+        "tags": ["Categorias"],
+        "responses": {
+          "200": {
+            "description": "Lista de categorias retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "nome": {
+                        "type": "string",
+                        "example": "Eletrônicos"
+                      },
+                      "descricao": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "Produtos eletrônicos em geral"
+                      },
+                      "criadoEm": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-11-21T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria uma nova categoria (somente Admin/SuperAdmin)",
+        "description": "Registra uma nova categoria no sistema com nome e descrição opcional. <br><br> Esta operação é restrita a usuários com role ADMIN ou SUPERADMIN. <br><br> Validações: - Nome é obrigatório e deve ter entre 2 e 100 caracteres - Nome deve ser único (case-insensitive) - Descrição é opcional e pode ter até 500 caracteres\n",
+        "tags": ["Categorias"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["nome"],
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 100,
+                    "example": "Eletrônicos"
+                  },
+                  "descricao": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "nullable": true,
+                    "example": "Produtos eletrônicos em geral"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Categoria criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "nome": {
+                      "type": "string",
+                      "example": "Eletrônicos"
+                    },
+                    "descricao": {
+                      "type": "string",
+                      "nullable": true,
+                      "example": "Produtos eletrônicos em geral"
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-11-21T10:30:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token não fornecido ou inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado (privilégios insuficientes)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Categoria com esse nome já existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Categoria com esse nome já existe."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categorias/{id}": {
+      "get": {
+        "summary": "Obtém uma categoria pelo ID",
+        "description": "Retorna os dados de uma categoria específica",
+        "tags": ["Categorias"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "ID da categoria",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Categoria encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "nome": {
+                      "type": "string",
+                      "example": "Eletrônicos"
+                    },
+                    "descricao": {
+                      "type": "string",
+                      "nullable": true,
+                      "example": "Produtos eletrônicos em geral"
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-11-21T10:30:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Categoria não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Categoria não encontrada."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualiza uma categoria (somente Admin/SuperAdmin)",
+        "description": "Atualiza os dados de uma categoria específica. <br><br> Esta operação é restrita a usuários com role ADMIN ou SUPERADMIN. <br><br> Validações: - Nome deve ter entre 2 e 100 caracteres (se fornecido) - Nome deve ser único (case-insensitive) - Descrição pode ter até 500 caracteres (se fornecida)\n",
+        "tags": ["Categorias"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "ID da categoria",
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 100,
+                    "example": "Eletrônicos Novos"
+                  },
+                  "descricao": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "nullable": true,
+                    "example": "Produtos eletrônicos novos com garantia"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Categoria atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "nome": {
+                      "type": "string",
+                      "example": "Eletrônicos Novos"
+                    },
+                    "descricao": {
+                      "type": "string",
+                      "nullable": true,
+                      "example": "Produtos eletrônicos novos com garantia"
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token não fornecido ou inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado (privilégios insuficientes)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Categoria não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Categoria com esse nome já existe",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deleta uma categoria (somente Admin/SuperAdmin)",
+        "description": "Remove uma categoria do sistema permanentemente. <br><br> Esta operação é restrita a usuários com role ADMIN ou SUPERADMIN. <br><br> **Restrição importante:** Não é possível deletar uma categoria que possui produtos vinculados. Remova os produtos ou os reatribua a outra categoria antes de deletar.\n",
+        "tags": ["Categorias"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "ID da categoria",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Categoria deletada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Categoria deletada com sucesso."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token não fornecido ou inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado (privilégios insuficientes)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Categoria não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Categoria não encontrada."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Não é possível deletar categoria com produtos vinculados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Não é possível deletar uma categoria que possui produtos vinculados."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compras": {
+      "get": {
+        "summary": "Lista todas as compras do usuário",
+        "description": "Retorna uma lista com todas as compras cadastradas pelo usuário autenticado, com filtros opcionais",
+        "tags": ["Compras"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "dataInicio",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Data inicial para filtro (ISO 8601)",
+            "example": "2025-11-01T00:00:00Z"
+          },
+          {
+            "in": "query",
+            "name": "dataFim",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Data final para filtro (ISO 8601)",
+            "example": "2025-11-30T23:59:59Z"
+          },
+          {
+            "in": "query",
+            "name": "fornecedor",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtrar por nome do fornecedor (busca parcial)",
+            "example": "Fornecedor XYZ"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de compras retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "fornecedor": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "Fornecedor ABC"
+                      },
+                      "data": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-11-21T10:00:00Z"
+                      },
+                      "total": {
+                        "type": "number",
+                        "example": 5000
+                      },
+                      "descricao": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "usuarioId": {
+                        "type": "number"
+                      },
+                      "usuario": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number"
+                          },
+                          "nome": {
+                            "type": "string"
+                          },
+                          "email": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "itens": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "number"
+                            },
+                            "quantidade": {
+                              "type": "number"
+                            },
+                            "custoUnit": {
+                              "type": "number"
+                            },
+                            "produtoId": {
+                              "type": "number"
+                            },
+                            "produto": {
+                              "type": "object"
+                            }
+                          }
+                        }
+                      },
+                      "criadoEm": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria uma nova compra com itens",
+        "description": "Registra uma nova compra no sistema com múltiplos itens. <br><br> Automaticamente: - Calcula o total (soma de custoUnit × quantidade) - Atualiza o estoque dos produtos - Cria uma movimentação financeira (saída de dinheiro) <br><br> Validações: - Todos os produtos devem existir e estar ativos - Quantidade e custo devem ser maiores que zero - Mínimo um item na compra\n",
+        "tags": ["Compras"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["itens"],
+                "properties": {
+                  "fornecedor": {
+                    "type": "string",
+                    "maxLength": 150,
+                    "example": "Fornecedor ABC LTDA"
+                  },
+                  "data": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-11-21T10:00:00Z"
+                  },
+                  "descricao": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "example": "Compra de estoque mensal"
+                  },
+                  "itens": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "required": ["produtoId", "quantidade", "custoUnit"],
+                      "properties": {
+                        "produtoId": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "quantidade": {
+                          "type": "number",
+                          "example": 10
+                        },
+                        "custoUnit": {
+                          "type": "number",
+                          "example": 500
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Compra criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "fornecedor": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "data": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "total": {
+                      "type": "number",
+                      "example": 5000
+                    },
+                    "descricao": {
+                      "type": "string"
+                    },
+                    "usuarioId": {
+                      "type": "number"
+                    },
+                    "usuario": {
+                      "type": "object"
+                    },
+                    "itens": {
+                      "type": "array"
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação ou dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "404": {
+            "description": "Um dos produtos não foi encontrado"
+          }
+        }
+      }
+    },
+    "/compras/{id}": {
+      "get": {
+        "summary": "Obtém uma compra pelo ID",
+        "description": "Retorna os dados detalhados de uma compra específica com seus itens",
+        "tags": ["Compras"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "ID da compra",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compra encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "fornecedor": {
+                      "type": "string",
+                      "nullable": true,
+                      "example": "Fornecedor ABC"
+                    },
+                    "data": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-11-21T10:00:00Z"
+                    },
+                    "total": {
+                      "type": "number",
+                      "example": 5000
+                    },
+                    "descricao": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "usuarioId": {
+                      "type": "number"
+                    },
+                    "usuario": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number"
+                        },
+                        "nome": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "itens": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number"
+                          },
+                          "quantidade": {
+                            "type": "number",
+                            "example": 10
+                          },
+                          "custoUnit": {
+                            "type": "number",
+                            "example": 500
+                          },
+                          "produtoId": {
+                            "type": "number"
+                          },
+                          "produto": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "number"
+                              },
+                              "nome": {
+                                "type": "string"
+                              },
+                              "descricao": {
+                                "type": "string"
+                              },
+                              "estoque": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "404": {
+            "description": "Compra não encontrada"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deleta uma compra e reverte o estoque",
+        "description": "Remove uma compra do sistema. <br><br> Automaticamente: - Reverte o estoque dos produtos (subtrai as quantidades adicionadas) - Cria uma movimentação financeira reversa (entrada de dinheiro) - Deleta a compra e seus itens <br><br> **Validações importantes:** - Verifica se há estoque suficiente para reverter - Executa tudo em transação (tudo ou nada)\n",
+        "tags": ["Compras"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "ID da compra",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compra deletada e estoque revertido com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Compra deletada e estoque revertido com sucesso."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido ou estoque insuficiente para reverter\n"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "404": {
+            "description": "Compra não encontrada"
+          }
+        }
+      }
+    },
+    "/config": {
+      "get": {
+        "summary": "Obtém as configurações atuais",
+        "description": "Retorna as configurações do sistema. Se não existirem, cria automaticamente com valores padrão:\n- saldoInicial: 0\n- mesAtual: mês atual\n",
+        "tags": ["Configurações"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Configurações retornadas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Configuracao"
+                },
+                "example": {
+                  "saldoInicial": 2000,
+                  "mesAtual": 4,
+                  "criadoEm": "2025-04-01T00:00:00.000Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualiza as configurações",
+        "description": "Atualiza as configurações do sistema. Garantias:\n- Apenas uma linha de configuração existe no banco\n- saldoInicial não pode ser negativo\n- mesAtual deve estar entre 1 e 12\n- Movimentações antigas NÃO são recalculadas\n- Novo saldoInicial influencia apenas saldos futuros\n",
+        "tags": ["Configurações"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConfiguracaoDTO"
+              },
+              "examples": {
+                "saldoInicial": {
+                  "summary": "Atualizar saldo inicial",
+                  "value": {
+                    "saldoInicial": 5000
+                  }
+                },
+                "mesAtual": {
+                  "summary": "Atualizar mês atual",
+                  "value": {
+                    "mesAtual": 5
+                  }
+                },
+                "ambos": {
+                  "summary": "Atualizar ambos",
+                  "value": {
+                    "saldoInicial": 5000,
+                    "mesAtual": 5
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Configurações atualizadas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Configuracao"
+                },
+                "example": {
+                  "saldoInicial": 5000,
+                  "mesAtual": 5,
+                  "criadoEm": "2025-04-01T00:00:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "saldoNegativo": {
+                    "value": {
+                      "message": "Erro de validação.",
+                      "errors": ["Saldo inicial não pode ser negativo."]
+                    }
+                  },
+                  "mesInvalido": {
+                    "value": {
+                      "message": "Erro de validação.",
+                      "errors": ["Mês deve estar entre 1 e 12."]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/despesas": {
+      "get": {
+        "summary": "Lista todas as despesas do usuário",
+        "description": "Retorna uma lista de todas as despesas do usuário autenticado.\nPermite filtrar por tipo, data, valor mínimo e máximo.\n",
+        "tags": ["Despesas"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tipo",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtrar por tipo de despesa",
+            "example": "Aluguel"
+          },
+          {
+            "in": "query",
+            "name": "dataInicio",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Data inicial para filtro (ISO 8601)",
+            "example": "2025-11-01T00:00:00Z"
+          },
+          {
+            "in": "query",
+            "name": "dataFim",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Data final para filtro (ISO 8601)",
+            "example": "2025-11-30T23:59:59Z"
+          },
+          {
+            "in": "query",
+            "name": "valorMinimo",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Valor mínimo da despesa",
+            "example": 1000
+          },
+          {
+            "in": "query",
+            "name": "valorMaximo",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Valor máximo da despesa",
+            "example": 5000
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de despesas retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Despesa"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "titulo": "Aluguel do escritório",
+                    "tipo": "Aluguel",
+                    "valor": 2500,
+                    "descricao": "Pagamento de novembro",
+                    "data": "2025-11-21T10:30:00Z",
+                    "criadoEm": "2025-11-21T09:00:00Z"
+                  },
+                  {
+                    "id": 2,
+                    "titulo": "Energia elétrica",
+                    "tipo": "Utilidades",
+                    "valor": 850.5,
+                    "descricao": null,
+                    "data": "2025-11-15T14:20:00Z",
+                    "criadoEm": "2025-11-15T08:30:00Z"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "Erro na validação dos filtros",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Token não fornecido ou inválido"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria uma nova despesa",
+        "description": "Cria uma nova despesa para o usuário autenticado.\nTambém registra automaticamente uma movimentação financeira de saída.\n",
+        "tags": ["Despesas"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DespesaDTO"
+              },
+              "examples": {
+                "basico": {
+                  "summary": "Exemplo básico",
+                  "value": {
+                    "titulo": "Aluguel do escritório",
+                    "tipo": "Aluguel",
+                    "valor": 2500
+                  }
+                },
+                "completo": {
+                  "summary": "Exemplo completo",
+                  "value": {
+                    "titulo": "Aluguel do escritório",
+                    "tipo": "Aluguel",
+                    "valor": 2500,
+                    "descricao": "Pagamento do mês de novembro",
+                    "data": "2025-11-21T10:30:00Z"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Despesa criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Despesa"
+                },
+                "example": {
+                  "id": 1,
+                  "titulo": "Aluguel do escritório",
+                  "tipo": "Aluguel",
+                  "valor": 2500,
+                  "descricao": "Pagamento do mês de novembro",
+                  "data": "2025-11-21T10:30:00Z",
+                  "criadoEm": "2025-11-21T09:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação ou regra de negócio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "titleTooShort": {
+                    "value": {
+                      "message": "Erro de validação.",
+                      "errors": ["Título deve ter no mínimo 3 caracteres"]
+                    }
+                  },
+                  "negativoValue": {
+                    "value": {
+                      "message": "Erro de validação.",
+                      "errors": ["Valor deve ser maior que zero"]
+                    }
+                  },
+                  "required": {
+                    "value": {
+                      "message": "Erro de validação.",
+                      "errors": ["Título é obrigatório", "Tipo é obrigatório"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          }
+        }
+      }
+    },
+    "/despesas/{id}": {
+      "get": {
+        "summary": "Obtém uma despesa específica",
+        "description": "Retorna os detalhes de uma despesa pelo ID",
+        "tags": ["Despesas"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID da despesa",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Despesa encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Despesa"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "403": {
+            "description": "Sem permissão para acessar esta despesa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Você não tem permissão para acessar esta despesa"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Despesa não encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Despesa não encontrada"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualiza uma despesa",
+        "description": "Atualiza uma despesa existente.\nTodos os campos são opcionais (update parcial).\nTambém atualiza a movimentação financeira relacionada se houver.\n",
+        "tags": ["Despesas"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID da despesa",
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DespesaDTO"
+              },
+              "examples": {
+                "updateTitulo": {
+                  "summary": "Atualizar apenas título",
+                  "value": {
+                    "titulo": "Aluguel - Novo Escritório"
+                  }
+                },
+                "updateValor": {
+                  "summary": "Atualizar apenas valor",
+                  "value": {
+                    "valor": 3000
+                  }
+                },
+                "updateMultiplo": {
+                  "summary": "Atualizar múltiplos campos",
+                  "value": {
+                    "titulo": "Aluguel - Novo Escritório",
+                    "valor": 3000,
+                    "descricao": "Novo contrato"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Despesa atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Despesa"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação ou regra de negócio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "403": {
+            "description": "Sem permissão para atualizar esta despesa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Despesa não encontrada"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deleta uma despesa",
+        "description": "Deleta uma despesa do sistema.\nTambém remove a movimentação financeira relacionada e recalcula saldos.\n",
+        "tags": ["Despesas"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID da despesa",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Despesa deletada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Despesa deletada com sucesso"
+                    },
+                    "id": {
+                      "type": "integer",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "403": {
+            "description": "Sem permissão para deletar esta despesa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Despesa não encontrada"
+          }
+        }
+      }
+    },
+    "/entradas": {
+      "get": {
+        "summary": "Lista todas as entradas financeiras",
+        "description": "Retorna uma lista de todas as entradas financeiras com filtros opcionais. Apenas entradas do usuário autenticado são retornadas.",
+        "tags": ["Entradas Financeiras"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tipo",
+            "in": "query",
+            "description": "Tipo de entrada (busca parcial case-insensitive)",
+            "schema": {
+              "type": "string",
+              "example": "aporte"
+            }
+          },
+          {
+            "name": "dataInicio",
+            "in": "query",
+            "description": "Data inicial (ISO 8601)",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2025-02-01T00:00:00Z"
+            }
+          },
+          {
+            "name": "dataFim",
+            "in": "query",
+            "description": "Data final (ISO 8601)",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2025-02-28T23:59:59Z"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de entradas financeiras retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EntradaFinanceira"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria uma nova entrada financeira",
+        "description": "Cria uma nova entrada financeira. Automaticamente:\n- Valida o valor (deve ser maior que zero)\n- Cria a Entrada Financeira\n- Registra movimentação financeira (entrada positiva)\n\n**Processo automático:**\n1. Validação de valor\n2. Criação da EntradaFinanceira\n3. Criação de MovimentacaoFinanceira (entrada: true)\n",
+        "tags": ["Entradas Financeiras"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEntradaFinanceiraDTO"
+              },
+              "examples": {
+                "aporte": {
+                  "summary": "Aporte de capital",
+                  "value": {
+                    "tipo": "aporte",
+                    "valor": 500,
+                    "descricao": "Aporte de capital",
+                    "data": "2025-02-01T10:00:00Z"
+                  }
+                },
+                "reembolso": {
+                  "summary": "Reembolso de despesa",
+                  "value": {
+                    "tipo": "reembolso",
+                    "valor": 150.5,
+                    "descricao": "Reembolso de combustível"
+                  }
+                },
+                "servico": {
+                  "summary": "Serviço prestado",
+                  "value": {
+                    "tipo": "serviço",
+                    "valor": 1200,
+                    "descricao": "Serviço de consultoria"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Entrada financeira criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntradaFinanceira"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação ou dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/entradas/{id}": {
+      "get": {
+        "summary": "Obtém uma entrada financeira específica",
+        "description": "Retorna os detalhes de uma entrada financeira incluindo informações do usuário.",
+        "tags": ["Entradas Financeiras"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID da entrada financeira",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entrada financeira obtida com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntradaFinanceira"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação (ID inválido)"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "404": {
+            "description": "Entrada financeira não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualiza uma entrada financeira",
+        "description": "Atualiza os dados de uma entrada financeira existente. Se o valor for alterado, a movimentação associada é atualizada automaticamente.\n",
+        "tags": ["Entradas Financeiras"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID da entrada financeira",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEntradaFinanceiraDTO"
+              },
+              "examples": {
+                "alterarValor": {
+                  "summary": "Alterar valor",
+                  "value": {
+                    "valor": 750
+                  }
+                },
+                "alterarTipo": {
+                  "summary": "Alterar tipo",
+                  "value": {
+                    "tipo": "reembolso"
+                  }
+                },
+                "alterarObservacao": {
+                  "summary": "Alterar observação",
+                  "value": {
+                    "descricao": "Aporte corrigido"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entrada financeira atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntradaFinanceira"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "403": {
+            "description": "Sem permissão para editar esta entrada"
+          },
+          "404": {
+            "description": "Entrada financeira não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deleta uma entrada financeira",
+        "description": "Deleta uma entrada financeira existente. Automaticamente:\n- Remove a entrada do sistema\n- Registra uma movimentação de reversão (saída)\n\n**Processo automático:**\n1. Verificação da entrada\n2. Criação de MovimentacaoFinanceira reversa (entrada: false)\n3. Deleção da entrada financeira\n",
+        "tags": ["Entradas Financeiras"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID da entrada a deletar",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entrada financeira deletada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Entrada financeira deletada com sucesso."
+                    },
+                    "entrada": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "tipo": {
+                          "type": "string"
+                        },
+                        "valor": {
+                          "type": "number"
+                        },
+                        "data": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "descricao": {
+                          "type": "string"
+                        },
+                        "usuarioId": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "403": {
+            "description": "Sem permissão para deletar esta entrada"
+          },
+          "404": {
+            "description": "Entrada financeira não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/movimentacoes": {
+      "get": {
+        "summary": "Lista todas as movimentações financeiras (extrato)",
+        "description": "Retorna o extrato completo de movimentações financeiras do usuário com saldoApos acumulado.",
+        "tags": ["Movimentações Financeiras"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "dataInicio",
+            "in": "query",
+            "description": "Data inicial (ISO 8601)",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2025-11-01T00:00:00Z"
+            }
+          },
+          {
+            "name": "dataFim",
+            "in": "query",
+            "description": "Data final (ISO 8601)",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2025-11-30T23:59:59Z"
+            }
+          },
+          {
+            "name": "tipo",
+            "in": "query",
+            "description": "Tipo de movimentação (busca parcial case-insensitive)",
+            "schema": {
+              "type": "string",
+              "example": "venda"
+            }
+          },
+          {
+            "name": "entrada",
+            "in": "query",
+            "description": "Filtrar por tipo de movimento (true=entrada, false=saída)",
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de movimentações retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MovimentacaoFinanceira"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "tipo": "entrada_financeira",
+                    "referenciaId": null,
+                    "descricao": "Entrada Financeira (aporte)",
+                    "valor": 2000,
+                    "entrada": true,
+                    "data": "2025-02-01T10:00:00Z",
+                    "saldoApos": 2000,
+                    "usuarioId": 1
+                  },
+                  {
+                    "id": 2,
+                    "tipo": "compra",
+                    "referenciaId": 1,
+                    "descricao": "Compra #1",
+                    "valor": 500,
+                    "entrada": false,
+                    "data": "2025-02-02T10:00:00Z",
+                    "saldoApos": 1500,
+                    "usuarioId": 1
+                  },
+                  {
+                    "id": 3,
+                    "tipo": "venda",
+                    "referenciaId": 1,
+                    "descricao": "Venda #1",
+                    "valor": 800,
+                    "entrada": true,
+                    "data": "2025-02-03T10:00:00Z",
+                    "saldoApos": 2300,
+                    "usuarioId": 1
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/movimentacoes/{id}": {
+      "get": {
+        "summary": "Obtém uma movimentação financeira específica",
+        "description": "Retorna os detalhes de uma movimentação incluindo usuário.",
+        "tags": ["Movimentações Financeiras"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID da movimentação",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Movimentação obtida com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovimentacaoFinanceira"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "404": {
+            "description": "Movimentação não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/movimentacoes/saldo-atual": {
+      "get": {
+        "summary": "Retorna o saldo atual do usuário",
+        "description": "Retorna apenas o saldo acumulado do usuário, baseado em:\n- Última movimentação (saldoApos)\n- Ou saldoInicial da tabela Configuracao se não houver movimentações\n",
+        "tags": ["Movimentações Financeiras"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Saldo atual retornado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaldoAtualResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/movimentacoes/dashboard/resumo": {
+      "get": {
+        "summary": "Retorna resumo para dashboard financeiro",
+        "description": "Retorna um resumo completo para exibição em dashboard:\n- Totais de entradas e saídas\n- Lucro (entradas - saídas)\n- Detalhamento por tipo\n- 5 últimas movimentações\n- Saldo atual acumulado\n",
+        "tags": ["Movimentações Financeiras"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resumo do dashboard retornado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovimentacaoDashboardResumo"
+                },
+                "example": {
+                  "totalEntradas": 2500,
+                  "totalSaidas": 1400,
+                  "lucro": 1100,
+                  "entradasPorTipo": {
+                    "venda": 1800,
+                    "entrada_financeira": 700
+                  },
+                  "saidasPorTipo": {
+                    "compra": 1400
+                  },
+                  "movimentacoesRecentes": [
+                    {
+                      "id": 5,
+                      "tipo": "venda",
+                      "descricao": "Venda #3",
+                      "valor": 250,
+                      "entrada": true,
+                      "data": "2025-11-21T15:00:00Z",
+                      "saldoApos": 2300
+                    }
+                  ],
+                  "saldoAtual": 2300
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/movimentacoes/ajuste": {
+      "post": {
+        "summary": "Registra uma movimentação de ajuste manual",
+        "description": "Cria uma movimentação manual de ajuste no extrato. Útil para:\n- Correções de saldo\n- Ajustes manuais\n- Transferências internas\n\nAutomaticamente:\n- Calcula saldoApos\n- Vincula ao usuário autenticado\n- Tipo é sempre \"ajuste\"\n",
+        "tags": ["Movimentações Financeiras"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAjusteDTO"
+              },
+              "examples": {
+                "entrada": {
+                  "summary": "Ajuste de entrada",
+                  "value": {
+                    "descricao": "Ajuste de caixa - entrada",
+                    "valor": 250.5,
+                    "entrada": true
+                  }
+                },
+                "saida": {
+                  "summary": "Ajuste de saída",
+                  "value": {
+                    "descricao": "Ajuste de caixa - saída",
+                    "valor": 100,
+                    "entrada": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Ajuste registrado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MovimentacaoFinanceira"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/password/send": {
+      "post": {
+        "summary": "Envia um código de redefinição de senha para o e-mail informado",
+        "tags": ["Password Reset"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Código enviado com sucesso"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        }
+      }
+    },
+    "/password/validate": {
+      "get": {
+        "summary": "Valida o código de redefinição de senha",
+        "tags": ["Password Reset"],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Código válido"
+          },
+          "403": {
+            "description": "Código inválido"
+          },
+          "410": {
+            "description": "Código expirado"
+          }
+        }
+      }
+    },
+    "/password/reset": {
+      "post": {
+        "summary": "Redefine a senha do usuário após validação do código",
+        "tags": ["Password Reset"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "newPassword": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Senha atualizada com sucesso"
+          },
+          "400": {
+            "description": "Código inválido ou já utilizado"
+          },
+          "410": {
+            "description": "Código expirado"
+          }
+        }
+      }
+    },
+    "/produtos": {
+      "get": {
+        "summary": "Lista todos os produtos do usuário",
+        "description": "Retorna uma lista com todos os produtos cadastrados pelo usuário autenticado, com filtros opcionais",
+        "tags": ["Produtos"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "nome",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtrar por nome (busca parcial, case-insensitive)",
+            "example": "Notebook"
+          },
+          {
+            "in": "query",
+            "name": "categoriaId",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Filtrar por ID da categoria",
+            "example": 1
+          },
+          {
+            "in": "query",
+            "name": "ativo",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Filtrar por status ativo/inativo",
+            "example": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de produtos retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "nome": {
+                        "type": "string",
+                        "example": "Notebook Dell"
+                      },
+                      "descricao": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "Notebook de última geração"
+                      },
+                      "categoriaId": {
+                        "type": "number",
+                        "nullable": true,
+                        "example": 1
+                      },
+                      "categoria": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number"
+                          },
+                          "nome": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "precoVenda": {
+                        "type": "number",
+                        "example": 2500
+                      },
+                      "precoCompra": {
+                        "type": "number",
+                        "nullable": true,
+                        "example": 1800
+                      },
+                      "precoPromocional": {
+                        "type": "number",
+                        "nullable": true,
+                        "example": 2200
+                      },
+                      "estoque": {
+                        "type": "number",
+                        "example": 5
+                      },
+                      "ativo": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "imagem": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "usuarioId": {
+                        "type": "number"
+                      },
+                      "criadoEm": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "atualizadoEm": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria um novo produto",
+        "description": "Registra um novo produto no sistema com dados obrigatórios e opcionais. <br><br> Campos obrigatórios: - **nome**: String, mínimo 2 caracteres - **precoVenda**: Número maior que zero <br><br> Campos opcionais: - **descricao**: String, máximo 1000 caracteres - **categoriaId**: ID da categoria - **precoCompra**: Número maior que zero - **precoPromocional**: Número maior que zero - **estoqueInicial**: Número não-negativo (padrão: 0) - **imagem**: Arquivo de imagem (multipart/form-data) <br><br> A imagem é enviada como arquivo separado no campo \"imagem\" e será armazenada no S3.\n",
+        "tags": ["Produtos"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["nome", "precoVenda"],
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 150,
+                    "example": "Notebook Dell XPS 15"
+                  },
+                  "descricao": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "example": "Notebook de última geração com processador Intel"
+                  },
+                  "categoriaId": {
+                    "type": "number",
+                    "example": 1
+                  },
+                  "precoVenda": {
+                    "type": "number",
+                    "example": 2500.5
+                  },
+                  "precoCompra": {
+                    "type": "number",
+                    "example": 1800
+                  },
+                  "precoPromocional": {
+                    "type": "number",
+                    "example": 2200
+                  },
+                  "estoqueInicial": {
+                    "type": "number",
+                    "example": 5
+                  },
+                  "imagem": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Arquivo de imagem do produto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Produto criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number"
+                    },
+                    "nome": {
+                      "type": "string"
+                    },
+                    "descricao": {
+                      "type": "string"
+                    },
+                    "categoriaId": {
+                      "type": "number"
+                    },
+                    "precoVenda": {
+                      "type": "number"
+                    },
+                    "precoCompra": {
+                      "type": "number"
+                    },
+                    "precoPromocional": {
+                      "type": "number"
+                    },
+                    "estoque": {
+                      "type": "number"
+                    },
+                    "ativo": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "imagem": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "usuarioId": {
+                      "type": "number"
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação ou upload"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "409": {
+            "description": "Produto com esse nome já existe"
+          }
+        }
+      }
+    },
+    "/produtos/{id}": {
+      "get": {
+        "summary": "Obtém um produto pelo ID",
+        "description": "Retorna os dados de um produto específico",
+        "tags": ["Produtos"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "ID do produto",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Produto encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number"
+                    },
+                    "nome": {
+                      "type": "string"
+                    },
+                    "descricao": {
+                      "type": "string"
+                    },
+                    "categoriaId": {
+                      "type": "number",
+                      "nullable": true
+                    },
+                    "categoria": {
+                      "type": "object"
+                    },
+                    "precoVenda": {
+                      "type": "number"
+                    },
+                    "precoCompra": {
+                      "type": "number",
+                      "nullable": true
+                    },
+                    "precoPromocional": {
+                      "type": "number",
+                      "nullable": true
+                    },
+                    "estoque": {
+                      "type": "number"
+                    },
+                    "ativo": {
+                      "type": "boolean"
+                    },
+                    "imagem": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "usuarioId": {
+                      "type": "number"
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "404": {
+            "description": "Produto não encontrado"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualiza um produto",
+        "description": "Atualiza os dados de um produto específico. <br><br> Todos os campos são opcionais. Se uma nova imagem for enviada: - A imagem anterior será removida do S3 - A nova imagem será salva <br><br> **Nota:** O estoque não pode ser alterado por aqui. Use outro endpoint específico.\n",
+        "tags": ["Produtos"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "ID do produto",
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 150,
+                    "example": "Notebook Dell XPS 15 Pro"
+                  },
+                  "descricao": {
+                    "type": "string",
+                    "maxLength": 1000
+                  },
+                  "categoriaId": {
+                    "type": "number"
+                  },
+                  "precoVenda": {
+                    "type": "number"
+                  },
+                  "precoCompra": {
+                    "type": "number"
+                  },
+                  "precoPromocional": {
+                    "type": "number"
+                  },
+                  "imagem": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Produto atualizado com sucesso"
+          },
+          "400": {
+            "description": "Erro de validação"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "404": {
+            "description": "Produto não encontrado"
+          },
+          "409": {
+            "description": "Produto com esse nome já existe"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deleta um produto",
+        "description": "Remove um produto do sistema. <br><br> Comportamento: - Se o produto possui vendas ou compras vinculadas: é marcado como inativo (soft delete) - Se não possui vinculações: é removido completamente (hard delete) - A imagem no S3 é deletada se existir\n",
+        "tags": ["Produtos"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "ID do produto",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Produto deletado ou marcado como inativo com sucesso"
+          },
+          "400": {
+            "description": "ID inválido"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "404": {
+            "description": "Produto não encontrado"
+          }
+        }
+      }
+    },
+    "/produtos/{id}/status": {
+      "put": {
+        "summary": "Atualiza o status de um produto (ativo/inativo)",
+        "description": "Define se um produto está ativo ou inativo no sistema. <br><br> Um produto marcado como inativo não aparecerá nas listagens mas seus dados são preservados.\n",
+        "tags": ["Produtos"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "ID do produto",
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["ativo"],
+                "properties": {
+                  "ativo": {
+                    "type": "boolean",
+                    "example": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status atualizado com sucesso"
+          },
+          "400": {
+            "description": "Erro de validação"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "404": {
+            "description": "Produto não encontrado"
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "summary": "Lista todos os usuários",
+        "description": "Retorna uma lista com todos os usuários cadastrados no sistema",
+        "tags": ["Usuários"],
+        "responses": {
+          "200": {
+            "description": "Lista de usuários retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "nome": {
+                        "type": "string",
+                        "example": "Gabrielli Borges"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "gabi@example.com"
+                      },
+                      "role": {
+                        "type": "string",
+                        "enum": ["USER", "ADMIN", "SUPERADMIN"],
+                        "example": "USER"
+                      },
+                      "theme": {
+                        "type": "string",
+                        "enum": ["LIGHT", "DARK"],
+                        "example": "DARK"
+                      },
+                      "ativo": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "criadoEm": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-11-21T10:30:00Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria um novo usuário (somente Admin/SuperAdmin)",
+        "description": "Registra um novo usuário no sistema com nome, e-mail, senha, role, tema e status. <br><br> Esta operação é restrita a usuários com role ADMIN ou SUPERADMIN. <br><br> A senha deve atender aos seguintes critérios: - Ter pelo menos 6 caracteres; - Conter pelo menos uma letra maiúscula; - Conter pelo menos uma letra minúscula; - Conter pelo menos um número. <br><br> Roles disponíveis: - **USER**: Usuário comum - **ADMIN**: Administrador (pode criar usuários) - **SUPERADMIN**: Super administrador (acesso total)\n",
+        "tags": ["Usuários"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["nome", "email", "senha"],
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "minLength": 3,
+                    "example": "João Silva Admin"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "joao.admin@example.com"
+                  },
+                  "senha": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "Admin@123"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["USER", "ADMIN", "SUPERADMIN"],
+                    "default": "USER",
+                    "example": "ADMIN"
+                  },
+                  "theme": {
+                    "type": "string",
+                    "enum": ["LIGHT", "DARK"],
+                    "default": "DARK",
+                    "example": "DARK"
+                  },
+                  "ativo": {
+                    "type": "boolean",
+                    "default": true,
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuário criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 2
+                    },
+                    "nome": {
+                      "type": "string",
+                      "example": "João Silva Admin"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "joao.admin@example.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": ["USER", "ADMIN", "SUPERADMIN"],
+                      "example": "ADMIN"
+                    },
+                    "theme": {
+                      "type": "string",
+                      "example": "DARK"
+                    },
+                    "ativo": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-11-21T10:30:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token não fornecido ou inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado (privilégios insuficientes)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Acesso negado. Privilégios insuficientes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "E-mail já cadastrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "E-mail já cadastrado."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "summary": "Obtém um usuário pelo ID",
+        "description": "Retorna os dados de um usuário específico",
+        "tags": ["Usuários"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "ID do usuário",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuário encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "nome": {
+                      "type": "string",
+                      "example": "Gabrielli Borges"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "gabi@example.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": ["USER", "ADMIN", "SUPERADMIN"],
+                      "example": "USER"
+                    },
+                    "theme": {
+                      "type": "string",
+                      "enum": ["LIGHT", "DARK"],
+                      "example": "DARK"
+                    },
+                    "ativo": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-11-21T10:30:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Usuário não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualiza um usuário",
+        "description": "Atualiza os dados de um usuário específico (requer autenticação). <br><br> Admins podem alterar role, status ativo e todos os dados. Usuários comuns podem alterar apenas seus próprios dados (exceto role).\n",
+        "tags": ["Usuários"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "ID do usuário",
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "minLength": 3,
+                    "example": "Gabrielli Borges Novo"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "novo@example.com"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["USER", "ADMIN", "SUPERADMIN"],
+                    "example": "ADMIN"
+                  },
+                  "theme": {
+                    "type": "string",
+                    "enum": ["LIGHT", "DARK"],
+                    "example": "LIGHT"
+                  },
+                  "ativo": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuário atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "nome": {
+                      "type": "string",
+                      "example": "Gabrielli Borges Novo"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "novo@example.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": ["USER", "ADMIN", "SUPERADMIN"],
+                      "example": "ADMIN"
+                    },
+                    "theme": {
+                      "type": "string",
+                      "example": "LIGHT"
+                    },
+                    "ativo": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação"
+          },
+          "401": {
+            "description": "Token não fornecido ou inválido"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          },
+          "409": {
+            "description": "E-mail já cadastrado"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deleta um usuário (somente Admin/SuperAdmin)",
+        "description": "Remove um usuário do sistema permanentemente. <br><br> Esta operação é restrita a usuários com role ADMIN ou SUPERADMIN.\n",
+        "tags": ["Usuários"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "ID do usuário",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuário deletado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Usuário deletado com sucesso."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido"
+          },
+          "401": {
+            "description": "Token não fornecido ou inválido"
+          },
+          "403": {
+            "description": "Acesso negado (privilégios insuficientes)"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        }
+      }
+    },
+    "/user/{id}/theme": {
+      "put": {
+        "summary": "Atualiza o tema do usuário",
+        "description": "Atualiza o tema (LIGHT ou DARK) do usuário autenticado",
+        "tags": ["Usuários"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "ID do usuário",
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["theme"],
+                "properties": {
+                  "theme": {
+                    "type": "string",
+                    "enum": ["LIGHT", "DARK"],
+                    "example": "LIGHT"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tema atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Tema atualizado com sucesso."
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "nome": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "theme": {
+                          "type": "string",
+                          "example": "LIGHT"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação"
+          },
+          "401": {
+            "description": "Token não fornecido ou inválido"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        }
+      }
+    },
+    "/user/{id}/password": {
+      "put": {
+        "summary": "Atualiza a senha do usuário",
+        "description": "Atualiza a senha do usuário autenticado (requer senha atual correta)",
+        "tags": ["Usuários"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "ID do usuário",
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["oldPassword", "newPassword"],
+                "properties": {
+                  "oldPassword": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "SenhaAntiga123"
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "NovaSenha456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Senha atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Senha atualizada com sucesso."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação"
+          },
+          "401": {
+            "description": "Token não fornecido, inválido ou senha atual incorreta"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        }
+      }
+    },
+    "/user/profile": {
+      "get": {
+        "summary": "Obtém o perfil do usuário autenticado",
+        "description": "Retorna os dados do usuário logado",
+        "tags": ["Usuários"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dados do perfil retornados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "nome": {
+                      "type": "string",
+                      "example": "Gabrielli Borges"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "gabi@example.com"
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": ["USER", "ADMIN", "SUPERADMIN"],
+                      "example": "USER"
+                    },
+                    "theme": {
+                      "type": "string",
+                      "enum": ["LIGHT", "DARK"],
+                      "example": "DARK"
+                    },
+                    "ativo": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token não fornecido ou inválido"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        }
+      }
+    },
+    "/vendas": {
+      "get": {
+        "summary": "Lista todas as vendas",
+        "description": "Retorna uma lista de todas as vendas com filtros opcionais. Apenas vendas do usuário autenticado são retornadas.",
+        "tags": ["Vendas"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "dataInicio",
+            "in": "query",
+            "description": "Data inicial da venda (ISO 8601)",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2025-11-01T00:00:00Z"
+            }
+          },
+          {
+            "name": "dataFim",
+            "in": "query",
+            "description": "Data final da venda (ISO 8601)",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2025-11-30T23:59:59Z"
+            }
+          },
+          {
+            "name": "formaPagamento",
+            "in": "query",
+            "description": "Forma de pagamento (busca parcial case-insensitive)",
+            "schema": {
+              "type": "string",
+              "example": "pix"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de vendas retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Venda"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria uma nova venda",
+        "description": "Cria uma nova venda com múltiplos itens. Automaticamente:\n- Valida existência e disponibilidade dos produtos\n- Verifica estoque suficiente para cada item\n- Calcula o total da venda\n- Decrementa o estoque de cada produto\n- Registra movimentação financeira (entrada)\n\n**Processo automático:**\n1. Validação de produtos e estoque\n2. Criação da Venda e ItemVenda[]\n3. Atualização de estoque (decrement)\n4. Criação de MovimentacaoFinanceira (entrada: true)\n",
+        "tags": ["Vendas"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVendaDTO"
+              },
+              "examples": {
+                "simples": {
+                  "summary": "Venda com um item",
+                  "value": {
+                    "formaPagamento": "pix",
+                    "descricao": "Cliente fiel",
+                    "itens": [
+                      {
+                        "produtoId": 1,
+                        "quantidade": 2,
+                        "precoUnit": 19.9
+                      }
+                    ]
+                  }
+                },
+                "multiplos": {
+                  "summary": "Venda com múltiplos itens",
+                  "value": {
+                    "formaPagamento": "cartao",
+                    "descricao": "Pedido corporativo",
+                    "data": "2025-11-21T10:00:00Z",
+                    "itens": [
+                      {
+                        "produtoId": 1,
+                        "quantidade": 2,
+                        "precoUnit": 19.9
+                      },
+                      {
+                        "produtoId": 2,
+                        "quantidade": 1,
+                        "precoUnit": 39.9
+                      },
+                      {
+                        "produtoId": 3,
+                        "quantidade": 5,
+                        "precoUnit": 9.99
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Venda criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "formaPagamento": {
+                      "type": "string",
+                      "example": "pix"
+                    },
+                    "data": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-11-21T10:00:00Z"
+                    },
+                    "total": {
+                      "type": "number",
+                      "format": "decimal",
+                      "example": 79.7,
+                      "description": "Calculado automaticamente: sum(quantidade × precoUnit)"
+                    },
+                    "descricao": {
+                      "type": "string"
+                    },
+                    "usuarioId": {
+                      "type": "integer"
+                    },
+                    "usuario": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "nome": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "itens": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemVenda"
+                      }
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação ou dados inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "estoque_insuficiente": {
+                    "value": {
+                      "message": "Estoque insuficiente do produto \"Notebook Dell\". Disponível: 5, solicitado: 10."
+                    }
+                  },
+                  "produto_nao_encontrado": {
+                    "value": {
+                      "message": "Produto com ID 999 não encontrado."
+                    }
+                  },
+                  "produto_inativo": {
+                    "value": {
+                      "message": "Produto \"Notebook Dell\" não está disponível."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/vendas/{id}": {
+      "get": {
+        "summary": "Obtém uma venda específica",
+        "description": "Retorna os detalhes de uma venda incluindo todos os seus itens e informações do produto.",
+        "tags": ["Vendas"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID da venda",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Venda obtida com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "formaPagamento": {
+                      "type": "string",
+                      "example": "pix"
+                    },
+                    "data": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-11-21T10:00:00Z"
+                    },
+                    "total": {
+                      "type": "number",
+                      "format": "decimal",
+                      "example": 79.7
+                    },
+                    "descricao": {
+                      "type": "string",
+                      "example": "Cliente fiel"
+                    },
+                    "usuarioId": {
+                      "type": "integer"
+                    },
+                    "usuario": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "nome": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "itens": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemVenda"
+                      },
+                      "example": [
+                        {
+                          "id": 1,
+                          "quantidade": 2,
+                          "precoUnit": 19.9,
+                          "produtoId": 1,
+                          "produto": {
+                            "id": 1,
+                            "nome": "Notebook Dell",
+                            "descricao": "Notebook potente",
+                            "estoque": 8
+                          }
+                        },
+                        {
+                          "id": 2,
+                          "quantidade": 1,
+                          "precoUnit": 39.9,
+                          "produtoId": 2,
+                          "produto": {
+                            "id": 2,
+                            "nome": "Monitor LG",
+                            "descricao": "Monitor 24 polegadas",
+                            "estoque": 4
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação (ID inválido)"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "404": {
+            "description": "Venda não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/vendas/{id}/cancelar": {
+      "post": {
+        "summary": "Cancela uma venda",
+        "description": "Cancela uma venda existente. Automaticamente:\n- Reverte o estoque de todos os itens (incrementa)\n- Registra movimentação financeira de reversão (saída)\n- Remove a venda do sistema\n\n**Processo automático:**\n1. Verificação da venda\n2. Atualização de estoque (increment)\n3. Criação de MovimentacaoFinanceira reversa (entrada: false)\n4. Deleção da venda (cascade deleta ItemVenda)\n",
+        "tags": ["Vendas"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID da venda a cancelar",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Venda cancelada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Venda cancelada e estoque revertido com sucesso."
+                    },
+                    "venda": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "formaPagamento": {
+                          "type": "string",
+                          "example": "pix"
+                        },
+                        "data": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "total": {
+                          "type": "number",
+                          "format": "decimal"
+                        },
+                        "descricao": {
+                          "type": "string"
+                        },
+                        "usuarioId": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação"
+          },
+          "401": {
+            "description": "Não autenticado"
+          },
+          "403": {
+            "description": "Sem permissão para cancelar esta venda"
+          },
+          "404": {
+            "description": "Venda não encontrada"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Configuracao": {
+        "type": "object",
+        "properties": {
+          "saldoInicial": {
+            "type": "number",
+            "format": "decimal",
+            "example": 2000,
+            "description": "Saldo inicial do sistema (padrão: 0)"
+          },
+          "mesAtual": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "example": 4,
+            "description": "Mês atual (1-12)"
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-04-01T00:00:00.000Z"
+          }
+        }
+      },
+      "UpdateConfiguracaoDTO": {
+        "type": "object",
+        "properties": {
+          "saldoInicial": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Novo saldo inicial (deve ser ≥ 0)",
+            "example": 5000
+          },
+          "mesAtual": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Novo mês atual (1-12)",
+            "example": 5
+          }
+        }
+      },
+      "Despesa": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "titulo": {
+            "type": "string",
+            "example": "Aluguel do escritório"
+          },
+          "tipo": {
+            "type": "string",
+            "example": "Aluguel"
+          },
+          "valor": {
+            "type": "number",
+            "format": "decimal",
+            "example": 2500
+          },
+          "descricao": {
+            "type": "string",
+            "example": "Pagamento referente ao mês de novembro"
+          },
+          "data": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-11-21T10:30:00Z"
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-11-21T09:00:00Z"
+          }
+        }
+      },
+      "DespesaDTO": {
+        "type": "object",
+        "required": ["titulo", "tipo", "valor"],
+        "properties": {
+          "titulo": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 100,
+            "example": "Aluguel do escritório"
+          },
+          "tipo": {
+            "type": "string",
+            "example": "Aluguel"
+          },
+          "valor": {
+            "type": "number",
+            "format": "decimal",
+            "example": 2500
+          },
+          "descricao": {
+            "type": "string",
+            "maxLength": 500,
+            "example": "Pagamento do mês de novembro"
+          },
+          "data": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-11-21T10:30:00Z"
+          }
+        }
+      },
+      "EntradaFinanceira": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "tipo": {
+            "type": "string",
+            "example": "aporte"
+          },
+          "valor": {
+            "type": "number",
+            "format": "decimal",
+            "example": 500
+          },
+          "data": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-02-01T10:00:00Z"
+          },
+          "descricao": {
+            "type": "string",
+            "example": "Aporte de capital"
+          },
+          "usuarioId": {
+            "type": "integer",
+            "example": 1
+          },
+          "usuario": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "nome": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            }
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-11-21T15:30:00Z"
+          }
+        }
+      },
+      "CreateEntradaFinanceiraDTO": {
+        "type": "object",
+        "required": ["tipo", "valor"],
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "description": "Tipo de entrada (ex: aporte, reembolso, serviço, outro)",
+            "example": "aporte"
+          },
+          "valor": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Valor da entrada (deve ser maior que zero)",
+            "example": 500
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Observação opcional",
+            "example": "Aporte de capital"
+          },
+          "data": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data da entrada (opcional, padrão: agora)",
+            "example": "2025-02-01T10:00:00Z"
+          }
+        }
+      },
+      "UpdateEntradaFinanceiraDTO": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "description": "Tipo de entrada (opcional)",
+            "example": "reembolso"
+          },
+          "valor": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Valor da entrada (opcional, deve ser maior que zero)",
+            "example": 750
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Observação opcional",
+            "example": "Reembolso de despesa"
+          },
+          "data": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data da entrada (opcional)",
+            "example": "2025-02-02T10:00:00Z"
+          }
+        }
+      },
+      "MovimentacaoFinanceira": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "tipo": {
+            "type": "string",
+            "description": "Tipo de movimentação (venda, compra, entrada_financeira, ajuste, cancelamento_venda, reversao_entrada)",
+            "example": "venda"
+          },
+          "referenciaId": {
+            "type": "integer",
+            "nullable": true,
+            "example": 1,
+            "description": "ID da referência (Venda, Compra, EntradaFinanceira, etc)"
+          },
+          "descricao": {
+            "type": "string",
+            "example": "Venda #1"
+          },
+          "valor": {
+            "type": "number",
+            "format": "decimal",
+            "example": 150
+          },
+          "entrada": {
+            "type": "boolean",
+            "example": true,
+            "description": "true = entrada de dinheiro, false = saída"
+          },
+          "data": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-11-21T10:00:00Z"
+          },
+          "saldoApos": {
+            "type": "number",
+            "format": "decimal",
+            "example": 2150,
+            "description": "Saldo acumulado após esta movimentação"
+          },
+          "usuarioId": {
+            "type": "integer",
+            "example": 1
+          },
+          "usuario": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "nome": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            }
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MovimentacaoDashboardResumo": {
+        "type": "object",
+        "properties": {
+          "totalEntradas": {
+            "type": "number",
+            "format": "decimal",
+            "example": 2500
+          },
+          "totalSaidas": {
+            "type": "number",
+            "format": "decimal",
+            "example": 1400
+          },
+          "lucro": {
+            "type": "number",
+            "format": "decimal",
+            "example": 1100
+          },
+          "entradasPorTipo": {
+            "type": "object",
+            "example": {
+              "venda": 1800,
+              "entrada_financeira": 700
+            }
+          },
+          "saidasPorTipo": {
+            "type": "object",
+            "example": {
+              "compra": 1400
+            }
+          },
+          "movimentacoesRecentes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "tipo": {
+                  "type": "string"
+                },
+                "descricao": {
+                  "type": "string"
+                },
+                "valor": {
+                  "type": "number"
+                },
+                "entrada": {
+                  "type": "boolean"
+                },
+                "data": {
+                  "type": "string"
+                },
+                "saldoApos": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "saldoAtual": {
+            "type": "number",
+            "format": "decimal",
+            "example": 2850
+          }
+        }
+      },
+      "SaldoAtualResponse": {
+        "type": "object",
+        "properties": {
+          "saldoAtual": {
+            "type": "number",
+            "format": "decimal",
+            "example": 2850
+          }
+        }
+      },
+      "CreateAjusteDTO": {
+        "type": "object",
+        "required": ["descricao", "valor", "entrada"],
+        "properties": {
+          "descricao": {
+            "type": "string",
+            "description": "Descrição do ajuste",
+            "example": "Ajuste de caixa"
+          },
+          "valor": {
+            "type": "number",
+            "format": "decimal",
+            "description": "Valor do ajuste (deve ser maior que zero)",
+            "example": 250.5
+          },
+          "entrada": {
+            "type": "boolean",
+            "description": "true para entrada, false para saída",
+            "example": true
+          }
+        }
+      },
+      "Venda": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "formaPagamento": {
+            "type": "string",
+            "example": "pix"
+          },
+          "data": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-11-21T10:00:00Z"
+          },
+          "total": {
+            "type": "number",
+            "format": "decimal",
+            "example": 79.7
+          },
+          "descricao": {
+            "type": "string",
+            "example": "Cliente fiel"
+          },
+          "usuarioId": {
+            "type": "integer",
+            "example": 1
+          },
+          "usuario": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "nome": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            }
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-11-21T15:30:00Z"
+          }
+        }
+      },
+      "ItemVenda": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "quantidade": {
+            "type": "integer",
+            "example": 2
+          },
+          "precoUnit": {
+            "type": "number",
+            "format": "decimal",
+            "example": 19.9
+          },
+          "produtoId": {
+            "type": "integer",
+            "example": 1
+          },
+          "produto": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "nome": {
+                "type": "string"
+              },
+              "descricao": {
+                "type": "string"
+              },
+              "estoque": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "CreateVendaDTO": {
+        "type": "object",
+        "required": ["formaPagamento", "itens"],
+        "properties": {
+          "formaPagamento": {
+            "type": "string",
+            "description": "Forma de pagamento (ex: pix, dinheiro, cartao)",
+            "example": "pix"
+          },
+          "descricao": {
+            "type": "string",
+            "description": "Observação opcional sobre a venda",
+            "example": "Cliente fiel"
+          },
+          "data": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data da venda (opcional, padrão: agora)",
+            "example": "2025-11-21T10:00:00Z"
+          },
+          "itens": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Itens da venda (mínimo 1)",
+            "items": {
+              "type": "object",
+              "required": ["produtoId", "quantidade", "precoUnit"],
+              "properties": {
+                "produtoId": {
+                  "type": "integer",
+                  "example": 1
+                },
+                "quantidade": {
+                  "type": "integer",
+                  "example": 2
+                },
+                "precoUnit": {
+                  "type": "number",
+                  "format": "decimal",
+                  "description": "Preço unitário no momento da venda",
+                  "example": 19.9
+                }
+              }
+            }
+          }
+        }
+      },
+      "CancelVendaResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Venda cancelada e estoque revertido com sucesso."
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Rotas de autenticação do sistema"
+    },
+    {
+      "name": "Configurações",
+      "description": "Operações relacionadas às configurações do sistema"
+    },
+    {
+      "name": "Entradas Financeiras",
+      "description": "Operações relacionadas a entradas financeiras do sistema"
+    },
+    {
+      "name": "Movimentações Financeiras",
+      "description": "Operações relacionadas ao extrato e movimentações financeiras completas"
+    },
+    {
+      "name": "Password Reset",
+      "description": "Recuperação e redefinição de senha"
+    },
+    {
+      "name": "Vendas",
+      "description": "Operações relacionadas a vendas de produtos"
+    }
+  ]
+}
