@@ -60,7 +60,8 @@ export const signupPrimeiroUsuario = async (
     usuario.id,
     usuario.nome,
     usuario.email,
-    usuario.role
+    usuario.role,
+    usuario.associacaoId
   );
 
   // Remover senha do retorno
@@ -118,7 +119,8 @@ export const signup = async (data: SignupInput) => {
     usuario.id,
     usuario.nome,
     usuario.email,
-    usuario.role
+    usuario.role,
+    usuario.associacaoId
   );
 
   // remove senha do retorno
@@ -151,7 +153,8 @@ export const login = async (data: LoginInput) => {
     usuario.id,
     usuario.nome,
     usuario.email,
-    usuario.role
+    usuario.role,
+    usuario.associacaoId
   );
 
   const { senha, associacao, ...usuarioSemSenha } = usuario;

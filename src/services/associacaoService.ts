@@ -1,3 +1,100 @@
+// Minha Associação
+export const getMinhaAssociacao = async (
+  usuarioId: number,
+  associacaoId: number
+) => {
+  // Garante que o usuário pertence à associação
+  const usuario = await prisma.usuario.findUnique({ where: { id: usuarioId } });
+  if (!usuario || usuario.associacaoId !== associacaoId) {
+    const error: any = new Error("Usuário não pertence à associação.");
+    error.statusCode = 403;
+    throw error;
+  }
+  const associacao = await prisma.associacao.findUnique({
+    where: { id: associacaoId },
+    select: {
+      id: true,
+      nome: true,
+      apelido: true,
+      cidade: true,
+      estado: true,
+      logoUrl: true,
+      regrasInternas: true,
+      horarioPadraoInicio: true,
+      horarioPadraoFim: true,
+      tipoJogoPadrao: true,
+      criadoEm: true,
+      atualizadoEm: true,
+    },
+  });
+  if (!associacao) {
+    const error: any = new Error("Associação não encontrada.");
+    error.statusCode = 404;
+    throw error;
+  }
+  return associacao;
+};
+
+export const atualizarMinhaAssociacao = async (
+  usuarioId: number,
+  associacaoId: number,
+  data: Partial<{
+    nome?: string;
+    apelido?: string;
+    cidade?: string;
+    estado?: string;
+    logoUrl?: string;
+    regrasInternas?: string;
+    horarioPadraoInicio?: string;
+    horarioPadraoFim?: string;
+    tipoJogoPadrao?: string;
+  }>
+) => {
+  const usuario = await prisma.usuario.findUnique({ where: { id: usuarioId } });
+  if (!usuario || usuario.associacaoId !== associacaoId) {
+    const error: any = new Error("Usuário não pertence à associação.");
+    error.statusCode = 403;
+    throw error;
+  }
+  const updateData: any = {
+    ...(data.nome !== undefined && { nome: data.nome }),
+    ...(data.apelido !== undefined && { apelido: data.apelido }),
+    ...(data.cidade !== undefined && { cidade: data.cidade }),
+    ...(data.estado !== undefined && { estado: data.estado }),
+    ...(data.logoUrl !== undefined && { logoUrl: data.logoUrl }),
+    ...(data.regrasInternas !== undefined && {
+      regrasInternas: data.regrasInternas,
+    }),
+    ...(data.horarioPadraoInicio !== undefined && {
+      horarioPadraoInicio: data.horarioPadraoInicio,
+    }),
+    ...(data.horarioPadraoFim !== undefined && {
+      horarioPadraoFim: data.horarioPadraoFim,
+    }),
+    ...(data.tipoJogoPadrao !== undefined && {
+      tipoJogoPadrao: { set: data.tipoJogoPadrao },
+    }),
+  };
+  const updated = await prisma.associacao.update({
+    where: { id: associacaoId },
+    data: updateData,
+    select: {
+      id: true,
+      nome: true,
+      apelido: true,
+      cidade: true,
+      estado: true,
+      logoUrl: true,
+      regrasInternas: true,
+      horarioPadraoInicio: true,
+      horarioPadraoFim: true,
+      tipoJogoPadrao: true,
+      criadoEm: true,
+      atualizadoEm: true,
+    },
+  });
+  return updated;
+};
 import { prisma } from "../config/prisma";
 import {
   CreateAssociacaoInput,

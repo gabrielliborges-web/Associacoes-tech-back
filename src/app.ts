@@ -30,8 +30,8 @@ app.use("/auth", authRoutes);
 app.use("/user", usersRoutes);
 app.use("/password-reset", passwordsRoutes);
 app.use("/usuarios", usuariosRoutes);
-app.use("/associacoes", associacoesRoutes);
-app.use("/associacoes", associacaoUsuarioRoutes); // rotas com mergeParams
+app.use("/associacao", associacoesRoutes);
+app.use("/associacoes", associacaoUsuarioRoutes);
 app.use("/", associadoRoutes);
 
 app.get("/", (req, res) => {

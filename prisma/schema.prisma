@@ -132,6 +132,10 @@ model Associacao {
   ativa        Boolean       @default(true)
   criadoEm     DateTime      @default(now())
   atualizadoEm DateTime      @updatedAt
+  regrasInternas      String?   // texto livre
+  horarioPadraoInicio String?
+  horarioPadraoFim    String?
+  tipoJogoPadrao      TipoJogo? @default(BABA)
 
   associados   Associado[]
   usuarios     Usuario[]

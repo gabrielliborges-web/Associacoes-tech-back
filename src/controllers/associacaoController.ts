@@ -1,3 +1,78 @@
+// Minha Associação
+export const getMinhaAssociacao = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const usuarioId = req.user?.id;
+    const associacaoId = req.user?.associacaoId;
+
+    console.log("Usuario ID:", usuarioId);
+    console.log("Associacao ID:", associacaoId);
+    if (!usuarioId || !associacaoId) {
+      res.status(401).json({
+        error: "Usuário não autenticado ou sem associação.",
+        usuarioId,
+        associacaoId,
+      });
+      return;
+    }
+    const associacao = await AssociacaoService.getMinhaAssociacao(
+      usuarioId,
+      associacaoId
+    );
+    res.status(200).json(associacao);
+  } catch (error: any) {
+    res
+      .status(error.statusCode || 500)
+      .json({ error: error.message || "Erro ao buscar associação." });
+  }
+};
+
+export const atualizarMinhaAssociacao = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const usuarioId = req.user?.id;
+    const associacaoId = req.user?.associacaoId;
+    if (!usuarioId || !associacaoId) {
+      res
+        .status(401)
+        .json({ error: "Usuário não autenticado ou sem associação." });
+      return;
+    }
+    let parsed = updateAssociacaoSchema.parse(req.body);
+    // Se veio arquivo, salva na AWS S3
+    if (req.file) {
+      const { uploadFileToS3, safeFileKey } = await import(
+        "../config/awsConfig"
+      );
+      const key = safeFileKey(
+        usuarioId,
+        parsed.nome || "associacao",
+        "cover",
+        req.file.originalname
+      );
+      const url = await uploadFileToS3(req.file, key);
+      parsed = { ...parsed, logoUrl: url ?? undefined };
+    }
+    const associacao = await AssociacaoService.atualizarMinhaAssociacao(
+      usuarioId,
+      associacaoId,
+      parsed
+    );
+    res.status(200).json(associacao);
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ errors: error.issues.map((i) => i.message) });
+      return;
+    }
+    res
+      .status(error.statusCode || 500)
+      .json({ error: error.message || "Erro ao atualizar associação." });
+  }
+};
 import { Request, Response } from "express";
 import { z } from "zod";
 import * as AssociacaoService from "../services/associacaoService";

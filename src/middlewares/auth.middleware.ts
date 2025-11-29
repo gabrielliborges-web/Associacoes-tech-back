@@ -2,17 +2,21 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-export interface AuthenticatedRequest extends Request {
-  user?: {
-    id: number;
-    nome: string;
-    email: string;
-    role: string;
-  };
+// Augment the express Request type to include `user`
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: {
+      id: number;
+      nome: string;
+      email: string;
+      role: string;
+      associacaoId?: number;
+    };
+  }
 }
 
 export const requireAuth = (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ): void => {
@@ -32,9 +36,17 @@ export const requireAuth = (
       nome: string;
       email: string;
       role: string;
+      associacaoId?: number;
     };
 
-    req.user = decoded;
+    // Popula req.user com associacaoId se presente no token
+    (req as any).user = {
+      id: decoded.id,
+      nome: decoded.nome,
+      email: decoded.email,
+      role: decoded.role,
+      associacaoId: decoded.associacaoId,
+    };
     next();
   } catch (err) {
     res.status(401).json({ error: "Token inválido." });
