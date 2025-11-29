@@ -83,22 +83,28 @@ enum PerfilAssociacao {
 ============================ */
 
 model Usuario {
-  id           Int                @id @default(autoincrement())
-  nome         String
-  email        String             @unique
-  senha        String
-  avatarUrl    String?
-  role         Role               @default(USER)
-  theme        Theme?             @default(DARK)
-  ativo        Boolean            @default(true)
-  criadoEm     DateTime           @default(now())
-  atualizadoEm DateTime           @updatedAt
+  id              Int              @id @default(autoincrement())
+  nome            String
+  email           String           @unique
+  senha           String
+  avatarUrl       String?
+  role            Role             @default(USER)
+  theme           Theme?           @default(DARK)
+  ativo           Boolean          @default(true)
+  criadoEm        DateTime         @default(now())
+  atualizadoEm    DateTime         @updatedAt
+
+  // Associação "master" à qual este usuário pertence (obrigatório)
+  associacaoId     Int
+  associacao       Associacao      @relation(fields: [associacaoId], references: [id])
+
+  // Perfil do usuário dentro da associação
+  perfilAssociacao PerfilAssociacao @default(SOCIO)
 
   // Relacionamento opcional com um Associado (quando o jogador tem login)
-  associado    Associado?         @relation("UsuarioAssociado")
+  associado        Associado?       @relation("UsuarioAssociado")
 
-  // Perfis do usuário em uma ou mais associações
-  associacoes  UsuarioAssociacao[]
+  @@index([associacaoId])
 }
 
 model PasswordReset {
@@ -116,20 +122,21 @@ model PasswordReset {
 ============================ */
 
 model Associacao {
-  id           Int                 @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   nome         String
   apelido      String?
   descricao    String?
   cidade       String?
   estado       String?
   logoUrl      String?
-  ativa        Boolean             @default(true)
-  criadoEm     DateTime            @default(now())
-  atualizadoEm DateTime            @updatedAt
+  ativa        Boolean       @default(true)
+  criadoEm     DateTime      @default(now())
+  atualizadoEm DateTime      @updatedAt
 
   associados   Associado[]
-  usuarios     UsuarioAssociacao[]
+  usuarios     Usuario[]
   jogos        Jogo[]
+  galerias     Galeria[]     // 👈 galeria geral de fotos/vídeos
 }
 
 /* ============================
@@ -166,23 +173,6 @@ model Associado {
 }
 
 /* ============================
-   USUÁRIO x ASSOCIAÇÃO (PERFIS)
-============================ */
-
-model UsuarioAssociacao {
-  id           Int              @id @default(autoincrement())
-  usuarioId    Int
-  associacaoId Int
-  perfil       PerfilAssociacao @default(SOCIO)
-
-  usuario      Usuario          @relation(fields: [usuarioId], references: [id])
-  associacao   Associacao       @relation(fields: [associacaoId], references: [id])
-
-  @@unique([usuarioId, associacaoId])
-  @@index([associacaoId])
-}
-
-/* ============================
    JOGOS / PARTIDAS
 ============================ */
 
@@ -205,14 +195,11 @@ model Jogo {
   gols         Gol[]
   cartoes      Cartao[]
   presencas    PresencaJogo[]
-
-  // 👉 ADICIONAR ESTA LINHA
   midias       MidiaJogo[]
 
   @@index([associacaoId])
   @@index([data])
 }
-
 
 /* ============================
    TIMES POR JOGO
@@ -221,9 +208,9 @@ model Jogo {
 model TimeJogo {
   id           Int        @id @default(autoincrement())
   jogoId       Int
-  nome         String          // Ex: "Time Azul", "Time Branco"
-  corPrincipal String?         // Ex: "#1D4ED8"
-  lado         LadoTime        // A ou B (p/ bater com placarTimeA / placarTimeB)
+  nome         String     // Ex: "Time Verde", "Time Azul"
+  corPrincipal String?    // Ex: "#16a34a"
+  lado         LadoTime   // A ou B (p/ bater com placarTimeA / placarTimeB)
 
   jogo         Jogo       @relation(fields: [jogoId], references: [id])
   jogadores    JogadorJogo[]
@@ -320,18 +307,55 @@ model PresencaJogo {
   @@index([associadoId])
 }
 
-
-
+/* ============================
+   MIDIAS (FOTOS / VÍDEOS) DO JOGO
+============================ */
 
 model MidiaJogo {
-  id          Int        @id @default(autoincrement())
-  jogoId      Int
-  url         String     // onde a imagem/vídeo está salvo
-  tipo        TipoMidia  @default(FOTO)
-  descricao   String?
-  criadoEm    DateTime   @default(now())
+  id        Int       @id @default(autoincrement())
+  jogoId    Int
+  url       String     // onde a imagem/vídeo está salvo
+  tipo      TipoMidia  @default(FOTO)
+  descricao String?
+  criadoEm  DateTime   @default(now())
 
-  jogo        Jogo       @relation(fields: [jogoId], references: [id])
+  jogo      Jogo       @relation(fields: [jogoId], references: [id])
 
   @@index([jogoId])
+}
+
+/* ============================
+   GALERIAS GERAIS DA ASSOCIAÇÃO
+============================ */
+
+model Galeria {
+  id           Int        @id @default(autoincrement())
+  associacaoId Int
+  titulo       String
+  descricao    String?
+  dataEvento   DateTime?
+  capaUrl      String?
+  visivel      Boolean    @default(true)
+  criadoEm     DateTime   @default(now())
+  atualizadoEm DateTime   @updatedAt
+
+  associacao   Associacao @relation(fields: [associacaoId], references: [id])
+  midias       MidiaGaleria[]
+
+  @@index([associacaoId])
+}
+
+model MidiaGaleria {
+  id        Int       @id @default(autoincrement())
+  galeriaId Int
+  url       String
+  tipo      TipoMidia @default(FOTO)
+  descricao String?
+  destaque  Boolean   @default(false)
+  ordem     Int?
+  criadoEm  DateTime  @default(now())
+
+  galeria   Galeria   @relation(fields: [galeriaId], references: [id])
+
+  @@index([galeriaId])
 }
