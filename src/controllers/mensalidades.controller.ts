@@ -70,6 +70,27 @@ export const listarUsuario = async (
   }
 };
 
+export const listarAssociacao = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const associacaoId = req.user?.associacaoId;
+    if (!associacaoId) {
+      res.status(401).json({ error: "Usuário não autenticado." });
+      return;
+    }
+    const ano = Number(req.query.ano) || new Date().getFullYear();
+    const mensalidades = await MensService.listarMensalidadesAssociacao(
+      associacaoId,
+      ano
+    );
+    res.status(200).json(mensalidades);
+  } catch (error: any) {
+    res.status(error.statusCode || 500).json({ error: error.message });
+  }
+};
+
 export const pagar = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const id = Number(req.params.id);
@@ -92,4 +113,4 @@ export const pagar = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-export default { gerarAno, listarMe, listarUsuario, pagar };
+export default { gerarAno, listarMe, listarUsuario, listarAssociacao, pagar };

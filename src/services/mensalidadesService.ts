@@ -87,6 +87,40 @@ export const listarMensalidadesUsuarioAdmin = async (
   return mensalidades;
 };
 
+export const listarMensalidadesAssociacao = async (
+  associacaoId: number,
+  ano: number
+) => {
+  // Verifica se todos os usuários ativos têm mensalidades para o ano;
+  // se algum estiver faltando, gera as mensalidades (geração é idempotente graças a skipDuplicates).
+  const activeUsers = await prisma.usuario.findMany({
+    where: { associacaoId, ativo: true, perfilAssociacao: "ASSOCIADO" },
+    select: { id: true },
+  });
+
+  const mensalidadesUsuarios = await prisma.mensalidadeAssociado.findMany({
+    where: { associacaoId, ano },
+    select: { usuarioId: true },
+  });
+
+  const uniqueUsuarioIds = Array.from(
+    new Set(mensalidadesUsuarios.map((m) => m.usuarioId))
+  );
+  const activeUsuarioIds = activeUsers.map((u) => u.id);
+
+  if (uniqueUsuarioIds.length < activeUsuarioIds.length) {
+    await gerarMensalidadesAno(associacaoId, ano);
+  }
+
+  const mensalidades = await prisma.mensalidadeAssociado.findMany({
+    where: { associacaoId, ano },
+    orderBy: { mes: "asc" },
+    include: { usuario: true },
+  });
+
+  return mensalidades;
+};
+
 export const pagarMensalidade = async (
   id: number,
   associacaoId: number,
@@ -136,5 +170,6 @@ export default {
   gerarMensalidadesAno,
   listarMensalidadesUsuario,
   listarMensalidadesUsuarioAdmin,
+  listarMensalidadesAssociacao,
   pagarMensalidade,
 };

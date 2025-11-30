@@ -18,6 +18,13 @@ router.get(
   requireAssociacaoManager,
   MensController.listarUsuario
 );
+// Lista mensalidades da associação
+router.get(
+  "/associacao",
+  requireAuth,
+  requireAssociacaoManager,
+  MensController.listarAssociacao
+);
 
 // Marca mensalidade como paga
 router.put("/:id/pagar", requireAuth, MensController.pagar);
