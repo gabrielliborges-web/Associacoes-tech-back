@@ -32,7 +32,7 @@ app.use("/password-reset", passwordsRoutes);
 app.use("/usuarios", usuariosRoutes);
 app.use("/associacao", associacoesRoutes);
 app.use("/associacoes", associacaoUsuarioRoutes);
-app.use("/", associadoRoutes);
+app.use("/associados", associadoRoutes);
 
 app.get("/", (req, res) => {
   res.send("Desafio-movie-back ON");

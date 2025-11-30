@@ -6,7 +6,11 @@ export const createAssociadoSchema = z.object({
   dataNascimento: z.string().optional(),
   telefone: z.string().optional(),
   email: z.string().email("E-mail inválido."),
-  fotoUrl: z.string().url().optional(),
+  fotoUrl: z
+    .string()
+    .url("URL inválida.")
+    .or(z.literal("")) // aceita ""
+    .optional(),
   numeroCamisaPadrao: z.number().int().optional(),
   posicaoPreferida: z
     .enum(["GOLEIRO", "ZAGUEIRO", "LATERAL", "VOLANTE", "MEIA", "ATACANTE"])
