@@ -124,3 +124,38 @@ export const delete_ = async (req: Request, res: Response): Promise<void> => {
       .json({ error: error.message || "Erro ao desativar associado." });
   }
 };
+
+export const deletePermanent = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ error: "ID inválido." });
+      return;
+    }
+    const result = await AssociadoService.deleteAssociado(id);
+    res.status(200).json(result);
+  } catch (error: any) {
+    res
+      .status(error.statusCode || 500)
+      .json({ error: error.message || "Erro ao excluir associado." });
+  }
+};
+
+export const activate = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ error: "ID inválido." });
+      return;
+    }
+    const result = await AssociadoService.activateAssociado(id);
+    res.status(200).json(result);
+  } catch (error: any) {
+    res
+      .status(error.statusCode || 500)
+      .json({ error: error.message || "Erro ao ativar associado." });
+  }
+};

@@ -28,5 +28,34 @@ router.delete(
   requireAssociacaoManager,
   AssociadoController.delete_
 );
+router.get("/:id", requireAuth, AssociadoController.show);
+router.patch(
+  "/:id",
+  requireAuth,
+  requireAssociacaoManager,
+  upload.single("foto"),
+  AssociadoController.update
+);
+router.delete(
+  "/:id",
+  requireAuth,
+  requireAssociacaoManager,
+  AssociadoController.delete_
+);
+
+// rota para remoção permanente
+router.delete(
+  "/:id/permanent",
+  requireAuth,
+  requireAssociacaoManager,
+  AssociadoController.deletePermanent
+);
+
+router.patch(
+  "/:id/activate",
+  requireAuth,
+  requireAssociacaoManager,
+  AssociadoController.activate
+);
 
 export default router;

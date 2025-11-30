@@ -153,3 +153,27 @@ export const deactivateAssociado = async (id: number) => {
   await prisma.usuario.update({ where: { id }, data: { ativo: false } });
   return { message: "Associado desativado com sucesso." };
 };
+
+export const activateAssociado = async (id: number) => {
+  const associado = await prisma.usuario.findUnique({ where: { id } });
+  if (!associado) {
+    const error: any = new Error("Associado não encontrado.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  await prisma.usuario.update({ where: { id }, data: { ativo: true } });
+  return { message: "Associado ativado com sucesso." };
+};
+
+export const deleteAssociado = async (id: number) => {
+  const associado = await prisma.usuario.findUnique({ where: { id } });
+  if (!associado) {
+    const error: any = new Error("Associado não encontrado.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  await prisma.usuario.delete({ where: { id } });
+  return { message: "Associado excluído com sucesso." };
+};
