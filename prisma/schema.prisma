@@ -141,6 +141,8 @@ model Usuario {
   presencas          PresencaJogo[]
   participacoes      JogadorJogo[]
 
+   mensalidades MensalidadeAssociado[]
+
   @@index([associacaoId])
 }
 
@@ -168,6 +170,8 @@ model Associacao {
   usuarios     Usuario[]
   jogos        Jogo[]
   galerias     Galeria[]
+  configMensalidade ConfigMensalidade?
+  mensalidades      MensalidadeAssociado[]
 }
 
 /* ============================

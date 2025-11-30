@@ -37,7 +37,7 @@ app.use("/associados", associadoRoutes);
 app.use("/financeiro/mensalidades", mensalidadesRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Desafio-movie-back ON");
+  res.send("Backend associacao ON");
 });
 
 export default app;
