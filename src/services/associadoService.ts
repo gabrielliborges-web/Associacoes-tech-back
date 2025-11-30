@@ -3,6 +3,7 @@ import {
   CreateAssociadoInput,
   UpdateAssociadoInput,
 } from "../validators/associado.schema";
+import bcrypt from "bcrypt";
 
 export const createAssociado = async (
   associacaoId: number,
@@ -17,21 +18,39 @@ export const createAssociado = async (
     throw error;
   }
 
-  const associado = await prisma.associado.create({
+  // Verificar se email já existe
+  if (data.email) {
+    const existingUser = await prisma.usuario.findUnique({
+      where: { email: data.email },
+    });
+    if (existingUser) {
+      const error: any = new Error("E-mail já cadastrado.");
+      error.statusCode = 400;
+      throw error;
+    }
+  }
+
+  // Gerar senha padrão se não fornecida
+  const senhaPadrao = data.email ? "123456" : ""; // Senha temporária
+  const hashedPassword = senhaPadrao ? await bcrypt.hash(senhaPadrao, 10) : "";
+
+  const associado = await prisma.usuario.create({
     data: {
       associacaoId,
       nome: data.nome,
+      email: data.email || "",
+      senha: hashedPassword,
+      perfilAssociacao: "ASSOCIADO",
       apelido: data.apelido,
       dataNascimento: data.dataNascimento
         ? new Date(data.dataNascimento)
         : null,
       telefone: data.telefone,
-      email: data.email,
-      fotoUrl: data.fotoUrl,
+      avatarUrl: data.fotoUrl,
       numeroCamisaPadrao: data.numeroCamisaPadrao,
       posicaoPreferida: data.posicaoPreferida as any,
       pernaDominante: data.pernaDominante as any,
-      ativo: data.ativo,
+      ativo: data.ativo ?? true,
       observacoes: data.observacoes,
     },
   });
@@ -49,11 +68,21 @@ export const listAssociados = async (associacaoId: number) => {
     throw error;
   }
 
-  return prisma.associado.findMany({ where: { associacaoId } });
+  return prisma.usuario.findMany({
+    where: {
+      associacaoId,
+      perfilAssociacao: "ASSOCIADO",
+    },
+  });
 };
 
 export const getAssociadoById = async (id: number) => {
-  const associado = await prisma.associado.findUnique({ where: { id } });
+  const associado = await prisma.usuario.findUnique({
+    where: { id },
+    include: {
+      associacao: true,
+    },
+  });
   if (!associado) {
     const error: any = new Error("Associado não encontrado.");
     error.statusCode = 404;
@@ -66,24 +95,36 @@ export const updateAssociado = async (
   id: number,
   data: UpdateAssociadoInput
 ) => {
-  const associado = await prisma.associado.findUnique({ where: { id } });
+  const associado = await prisma.usuario.findUnique({ where: { id } });
   if (!associado) {
     const error: any = new Error("Associado não encontrado.");
     error.statusCode = 404;
     throw error;
   }
 
-  const updated = await prisma.associado.update({
+  // Verificar se email já existe (se estiver sendo alterado)
+  if (data.email && data.email !== associado.email) {
+    const existingUser = await prisma.usuario.findUnique({
+      where: { email: data.email },
+    });
+    if (existingUser) {
+      const error: any = new Error("E-mail já cadastrado.");
+      error.statusCode = 400;
+      throw error;
+    }
+  }
+
+  const updated = await prisma.usuario.update({
     where: { id },
     data: {
       ...(data.nome && { nome: data.nome }),
-      ...(data.apelido && { apelido: data.apelido }),
+      ...(data.apelido !== undefined && { apelido: data.apelido }),
       ...(data.dataNascimento && {
         dataNascimento: new Date(data.dataNascimento),
       }),
-      ...(data.telefone && { telefone: data.telefone }),
+      ...(data.telefone !== undefined && { telefone: data.telefone }),
       ...(data.email && { email: data.email }),
-      ...(data.fotoUrl && { fotoUrl: data.fotoUrl }),
+      ...(data.fotoUrl !== undefined && { avatarUrl: data.fotoUrl }),
       ...(data.numeroCamisaPadrao !== undefined && {
         numeroCamisaPadrao: data.numeroCamisaPadrao,
       }),
@@ -94,7 +135,7 @@ export const updateAssociado = async (
         pernaDominante: data.pernaDominante as any,
       }),
       ...(data.ativo !== undefined && { ativo: data.ativo }),
-      ...(data.observacoes && { observacoes: data.observacoes }),
+      ...(data.observacoes !== undefined && { observacoes: data.observacoes }),
     },
   });
 
@@ -102,13 +143,13 @@ export const updateAssociado = async (
 };
 
 export const deactivateAssociado = async (id: number) => {
-  const associado = await prisma.associado.findUnique({ where: { id } });
+  const associado = await prisma.usuario.findUnique({ where: { id } });
   if (!associado) {
     const error: any = new Error("Associado não encontrado.");
     error.statusCode = 404;
     throw error;
   }
 
-  await prisma.associado.update({ where: { id }, data: { ativo: false } });
+  await prisma.usuario.update({ where: { id }, data: { ativo: false } });
   return { message: "Associado desativado com sucesso." };
 };

@@ -39,15 +39,21 @@ export const requireAuth = (
       associacaoId?: number;
     };
 
-    // Popula req.user com associacaoId se presente no token
-    (req as any).user = {
-      id: decoded.id,
-      nome: decoded.nome,
-      email: decoded.email,
-      role: decoded.role,
-      associacaoId: decoded.associacaoId,
-    };
-    next();
+    // Busca perfilAssociacao do usuário no banco
+    import("../config/prisma").then(async ({ prisma }) => {
+      const usuario = await prisma.usuario.findUnique({
+        where: { id: decoded.id },
+      });
+      (req as any).user = {
+        id: decoded.id,
+        nome: decoded.nome,
+        email: decoded.email,
+        role: decoded.role,
+        associacaoId: decoded.associacaoId,
+        perfilAssociacao: usuario?.perfilAssociacao,
+      };
+      next();
+    });
   } catch (err) {
     res.status(401).json({ error: "Token inválido." });
     return;

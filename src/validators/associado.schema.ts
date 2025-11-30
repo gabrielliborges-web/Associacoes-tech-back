@@ -5,7 +5,7 @@ export const createAssociadoSchema = z.object({
   apelido: z.string().optional(),
   dataNascimento: z.string().optional(),
   telefone: z.string().optional(),
-  email: z.string().email("E-mail inválido.").optional(),
+  email: z.string().email("E-mail inválido."),
   fotoUrl: z.string().url().optional(),
   numeroCamisaPadrao: z.number().int().optional(),
   posicaoPreferida: z
