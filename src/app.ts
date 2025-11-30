@@ -10,6 +10,7 @@ import associacoesRoutes from "./routes/associacao.routes";
 import associacaoUsuarioRoutes from "./routes/associacaoUsuario.routes";
 import associadoRoutes from "./routes/associado.routes";
 import mensalidadesRoutes from "./routes/mensalidades.routes";
+import configMensalidadeRoutes from "./routes/configMensalidade.routes";
 import { setupSwagger } from "./config/swagger";
 
 const app: Application = express();
@@ -35,6 +36,7 @@ app.use("/associacao", associacoesRoutes);
 app.use("/associacoes", associacaoUsuarioRoutes);
 app.use("/associados", associadoRoutes);
 app.use("/financeiro/mensalidades", mensalidadesRoutes);
+app.use("/financeiro/mensalidades/config", configMensalidadeRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend associacao ON");
