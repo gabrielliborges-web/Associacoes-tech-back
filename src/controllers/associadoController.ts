@@ -5,6 +5,7 @@ import {
   createAssociadoSchema,
   updateAssociadoSchema,
 } from "../validators/associado.schema";
+import { uploadFileToS3, safeFileKey } from "../config/awsConfig";
 
 export const create = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -14,10 +15,21 @@ export const create = async (req: Request, res: Response): Promise<void> => {
       return;
     }
     const parsed = createAssociadoSchema.parse(req.body);
-    const associado = await AssociadoService.createAssociado(
-      associacaoId,
-      parsed
-    );
+    let fotoUrl: string | undefined = "";
+    if (req.file) {
+      const key = safeFileKey(
+        undefined,
+        parsed.nome,
+        "cover",
+        req.file.originalname
+      );
+      const url = await uploadFileToS3(req.file, key);
+      fotoUrl = url || undefined;
+    }
+    const associado = await AssociadoService.createAssociado(associacaoId, {
+      ...parsed,
+      fotoUrl,
+    });
     res.status(201).json(associado);
   } catch (error: any) {
     if (error instanceof z.ZodError) {
@@ -70,7 +82,21 @@ export const update = async (req: Request, res: Response): Promise<void> => {
       return;
     }
     const parsed = updateAssociadoSchema.parse(req.body);
-    const associado = await AssociadoService.updateAssociado(id, parsed);
+    let fotoUrl: string | undefined = parsed.fotoUrl;
+    if (req.file) {
+      const key = safeFileKey(
+        undefined,
+        parsed.nome || "associado",
+        "cover",
+        req.file.originalname
+      );
+      const url = await uploadFileToS3(req.file, key);
+      fotoUrl = url || undefined;
+    }
+    const associado = await AssociadoService.updateAssociado(id, {
+      ...parsed,
+      fotoUrl,
+    });
     res.status(200).json(associado);
   } catch (error: any) {
     if (error instanceof z.ZodError) {

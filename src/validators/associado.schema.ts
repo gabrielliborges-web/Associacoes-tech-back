@@ -11,12 +11,25 @@ export const createAssociadoSchema = z.object({
     .url("URL inválida.")
     .or(z.literal("")) // aceita ""
     .optional(),
-  numeroCamisaPadrao: z.number().int().optional(),
+  numeroCamisaPadrao: z.preprocess((val) => {
+    if (val === undefined || val === null || val === "") return undefined;
+    const n = Number(val);
+    return Number.isNaN(n) ? val : n;
+  }, z.number().int().optional()),
   posicaoPreferida: z
     .enum(["GOLEIRO", "ZAGUEIRO", "LATERAL", "VOLANTE", "MEIA", "ATACANTE"])
     .optional(),
   pernaDominante: z.enum(["DIREITA", "ESQUERDA", "AMBIDESTRO"]).optional(),
-  ativo: z.boolean().optional().default(true),
+  ativo: z.preprocess((val) => {
+    if (val === undefined || val === null || val === "") return undefined;
+    if (typeof val === "boolean") return val;
+    if (typeof val === "string") {
+      const v = val.toLowerCase();
+      if (v === "true") return true;
+      if (v === "false") return false;
+    }
+    return val;
+  }, z.boolean().optional().default(true)),
   observacoes: z.string().optional(),
 });
 
