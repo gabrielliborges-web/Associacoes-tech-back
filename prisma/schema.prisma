@@ -83,6 +83,28 @@ enum PerfilAssociacao {
 }
 
 /* ============================
+   ENUMS FINANCEIROS / MENSALIDADES
+============================ */
+
+enum FormaPagamento {
+  DINHEIRO
+  PIX
+  CREDITO
+  DEBITO
+  TRANSFERENCIA
+  BOLETO
+  OUTRO
+}
+
+enum StatusMensalidade {
+  ABERTA
+  PAGA
+  ATRASADA
+  ISENTA
+  CANCELADA
+}
+
+/* ============================
    USUÁRIO (LOGIN + PERFIL)
 ============================ */
 
@@ -146,6 +168,49 @@ model Associacao {
   usuarios     Usuario[]
   jogos        Jogo[]
   galerias     Galeria[]
+}
+
+/* ============================
+   CONFIGURAÇÃO E MENSALIDADES
+============================ */
+
+model ConfigMensalidade {
+  id           Int         @id @default(autoincrement())
+  associacaoId Int         @unique
+  valorPadrao  Decimal     @db.Decimal(10, 2)
+  diaVencimento Int        @default(10)
+  ativo        Boolean     @default(true)
+
+  associacao   Associacao  @relation(fields: [associacaoId], references: [id])
+  criadoEm     DateTime    @default(now())
+  atualizadoEm DateTime    @updatedAt
+}
+
+model MensalidadeAssociado {
+  id            Int              @id @default(autoincrement())
+  associacaoId  Int
+  usuarioId     Int
+  ano           Int
+  mes           Int
+  valor         Decimal          @db.Decimal(10, 2)
+
+  status        StatusMensalidade @default(ABERTA)
+  vencimento    DateTime
+
+  dataPagamento DateTime?
+  formaPagamento FormaPagamento?
+  comprovanteUrl String?
+  observacoes    String?
+
+  associacao    Associacao       @relation(fields: [associacaoId], references: [id])
+  usuario       Usuario          @relation(fields: [usuarioId], references: [id])
+
+  criadoEm      DateTime         @default(now())
+  atualizadoEm  DateTime         @updatedAt
+
+  @@unique([associacaoId, usuarioId, ano, mes])
+  @@index([associacaoId, ano, mes])
+  @@index([usuarioId, ano, mes])
 }
 
 /* ============================
